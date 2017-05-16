@@ -1,7 +1,8 @@
-from src.parser.tokens.BracketToken import BracketToken
-from src.parser.tokens.FunctionToken import FunctionToken, Type
-from src.parser.tokens.LabelToken import LabelToken
-from src.parser.tokens.MarkerToken import MarkerToken
+from contract_parser.tokens.BracketToken import BracketToken
+from contract_parser.tokens.FunctionToken import FunctionToken, Type
+from contract_parser.tokens.LabelToken import LabelToken
+
+from contract_parser.tokens.MarkerToken import MarkerToken
 
 # -------------------- Functions -------------------- #
 EQUAL = FunctionToken("equal", (Type.ARGUMENT, Type.ARGUMENT,))

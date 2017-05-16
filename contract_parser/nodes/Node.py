@@ -1,7 +1,7 @@
+from contract_parser.tokens import tokens
 from typing import Iterable, Tuple, List
 
-from src.parser.tokens import tokens
-from src.parser.tokens.Token import Token
+from contract_parser.tokens.Token import Token
 
 
 class Node:

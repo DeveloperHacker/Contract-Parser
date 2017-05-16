@@ -1,4 +1,4 @@
-from src.parser.Parser import Parser
+from contract_parser.Parser import Parser
 
 if __name__ == '__main__':
     text = "                not_equal(@param[0], @null)\n" + \

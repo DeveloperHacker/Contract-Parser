@@ -1,4 +1,4 @@
-from src.parser.tokens.Token import Token
+from contract_parser.tokens.Token import Token
 
 
 class LabelToken(Token):
