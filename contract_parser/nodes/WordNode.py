@@ -1,8 +1,8 @@
+from typing import Iterable
+
+from contract_parser.Instruction import Instruction
 from contract_parser.nodes.Node import Node
 from contract_parser.tokens import tokens
-from typing import Iterable, Tuple
-
-from contract_parser.tokens.Token import Token
 
 
 class WordNode(Node):
@@ -11,7 +11,7 @@ class WordNode(Node):
         self.instance = instance
 
     def str(self, depth: int) -> Iterable[str]:
-        return [" " * depth + self.token.name + " " + self.instance]
+        return [" " * depth + self.token.name + " ~ " + self.instance]
 
-    def flatten(self) -> Iterable[Tuple[Token, str]]:
-        return [(self.token, self.instance)]
+    def flatten(self) -> Iterable[Instruction]:
+        return [Instruction(self.token, self.instance)]

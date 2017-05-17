@@ -1,7 +1,7 @@
-from contract_parser.nodes.Node import Node
-from typing import Iterable, Tuple
+from typing import Iterable, List
 
-from contract_parser.tokens.Token import Token
+from contract_parser.Instruction import Instruction
+from contract_parser.nodes.Node import Node
 
 
 class Tree:
@@ -14,8 +14,8 @@ class Tree:
             result.extend(root.str(0))
         return "\n".join(result)
 
-    def flatten(self) -> Iterable[Tuple[Token, str]]:
-        result = []
+    def flatten(self) -> Iterable[Instruction]:
+        result: List[Instruction] = []
         for root in self.roots:
             result.extend(root.flatten())
         return result

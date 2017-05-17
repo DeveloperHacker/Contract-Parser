@@ -1,23 +1,28 @@
 from enum import Enum
 
+from typing import Iterable, List, Tuple
+
+from contract_parser.Instruction import Instruction
+from contract_parser.nodes.Ast import Tree
 from contract_parser.nodes.Node import Node
 from contract_parser.nodes.RootNode import RootNode
 from contract_parser.nodes.StringNode import StringNode
-from contract_parser.nodes.Tree import Tree
 from contract_parser.nodes.WordNode import WordNode
 from contract_parser.tokens import tokens
 from contract_parser.tokens.FunctionToken import FunctionToken
 from contract_parser.tokens.LabelToken import LabelToken
 from contract_parser.tokens.MarkerToken import MarkerToken
-from typing import Iterable, Tuple
-
 from contract_parser.tokens.Token import Token
 
 
 class Parser:
     class ParseException(Exception):
         def __init__(self, line: int, message: str):
-            super().__init__("in {}: ParseError: {}".format(line, message))
+            super().__init__("in {}: ParseException: {}".format(line, message))
+
+    class AnalyseException(Exception):
+        def __init__(self, message: str):
+            super().__init__("AnalyseException: {}".format(message))
 
     class StringNotClosedException(ParseException):
         def __init__(self, line: int):
@@ -42,6 +47,14 @@ class Parser:
             text = "too few arguments ib predicate '{}', expected {}, got {}" \
                 .format(token.name, token.min_num_arguments, num_arguments)
             super().__init__(line, text)
+
+    class UnexpectedInstructionException(AnalyseException):
+        def __init__(self, instruction: Instruction):
+            super().__init__("instruction '{}' wasn't expected".format(instruction))
+
+    class ExpectedEndInstructionException(AnalyseException):
+        def __init__(self):
+            super().__init__("expected instruction 'END' at the end of the contract")
 
     @staticmethod
     def split(source: str) -> Iterable[str]:
@@ -84,16 +97,16 @@ class Parser:
         return len(token) > 0 and token[0] == "\""
 
     @staticmethod
-    def parse(source: str) -> Iterable[Tuple[Token, str]]:
+    def parse(source: str) -> Iterable[Instruction]:
         class State(Enum):
             LABEL = 0
             ARGUMENT = 1
             INVOKE = 2
 
-        parsed = []
-        stack = []
-        num_arguments = 0
-        state = State.LABEL
+        instructions: List[Instruction] = []
+        stack: List[Tuple[FunctionToken, int]] = []
+        num_arguments: int = 0
+        state: State = State.LABEL
         for line, element in Parser.split(source):
             if state == State.LABEL:
                 if Parser.is_string(element):
@@ -102,12 +115,12 @@ class Parser:
                     raise Parser.NotRecognizeException(line, element)
                 token = Token.value_of(element)
                 if isinstance(token, LabelToken):
-                    parsed.append((token, None))
+                    instructions.append(Instruction(token))
                     state = State.ARGUMENT
                 elif isinstance(token, FunctionToken):
                     stack.append((token, num_arguments))
-                    parsed.append((tokens.UNDEFINED, None))
-                    parsed.append((token, None))
+                    instructions.append(Instruction(tokens.UNDEFINED))
+                    instructions.append(Instruction(token))
                     state = State.INVOKE
                 else:
                     raise Parser.UnexpectedTokenException(line, element)
@@ -124,8 +137,8 @@ class Parser:
             elif state == State.ARGUMENT:
                 if Parser.is_string(element):
                     for word in element[1:].split(" "):
-                        parsed.append((tokens.WORD, word))
-                    parsed.append((tokens.END_STRING, None))
+                        instructions.append(Instruction(tokens.WORD, word))
+                    instructions.append(Instruction(tokens.END_STRING))
                     num_arguments += 1
                 elif Token.is_token(element):
                     token = Token.value_of(element)
@@ -137,63 +150,72 @@ class Parser:
                             raise Parser.TooManyArgumentsException(line, token, num_arguments)
                         if token.min_num_arguments < num_arguments:
                             raise Parser.TooFewArgumentsException(line, token, num_arguments)
-                        parsed.append((tokens.END_ARGS, None))
+                        instructions.append(Instruction(tokens.END_ARGS))
                         num_arguments = _num_arguments
                         if len(stack) == 0:
                             state = State.LABEL
                     elif isinstance(token, FunctionToken):
                         num_arguments += 1
                         stack.append((token, num_arguments))
-                        parsed.append((token, None))
+                        instructions.append(Instruction(token))
                         state = State.INVOKE
                     elif isinstance(token, MarkerToken):
-                        parsed.append((token, None))
+                        instructions.append(Instruction(token))
                         num_arguments += 1
                     else:
                         raise Parser.UnexpectedTokenException(line, element)
                 else:
                     raise Parser.NotRecognizeException(line, element)
-        return parsed
+        instructions.append(Instruction(tokens.END))
+        return instructions
 
     @staticmethod
-    def tree(parsed: Iterable[Tuple[Token, str]]) -> Tree:
+    def tree(instructions: Iterable[Instruction]) -> Tree:
         class State(Enum):
             LABEL = 0
             ARGUMENT = 1
             STRING = 2
+            END = 3
 
-        tree = Tree()
-        node = None
-        stack = []
-        state = State.LABEL
-        for token, word in parsed:
+        tree: Tree = Tree()
+        node: Node = None
+        stack: List[Node] = []
+        state: State = State.LABEL
+        for instruction in instructions:
             if state == State.LABEL:
-                node = RootNode(token)
-                tree.roots.append(node)
-                state = State.ARGUMENT
+                if instruction.token == tokens.END:
+                    state = State.END
+                else:
+                    node = RootNode(instruction.token)
+                    tree.roots.append(node)
+                    state = State.ARGUMENT
             elif state == State.ARGUMENT:
-                if token == tokens.END_ARGS:
+                if instruction.token == tokens.END_ARGS:
                     node = stack.pop()
                     if len(stack) == 0:
                         state = State.LABEL
-                elif token == tokens.WORD:
+                elif instruction.token == tokens.WORD:
                     stack.append(node)
                     _node = StringNode(tokens.STRING)
                     node.children.append(_node)
                     node = _node
-                    node.children.append(WordNode(word))
+                    node.children.append(WordNode(instruction.word))
                     state = State.STRING
-                elif isinstance(token, FunctionToken):
+                elif isinstance(instruction.token, FunctionToken):
                     stack.append(node)
-                    _node = Node(token)
+                    _node = Node(instruction.token)
                     node.children.append(_node)
                     node = _node
                 else:
-                    node.children.append(Node(token))
+                    node.children.append(Node(instruction.token))
             elif state == State.STRING:
-                if token == tokens.END_STRING:
+                if instruction.token == tokens.END_STRING:
                     node = stack.pop()
                     state = State.ARGUMENT
                 else:
-                    node.children.append(WordNode(word))
+                    node.children.append(WordNode(instruction.word))
+            elif state == State.END:
+                raise Parser.UnexpectedInstructionException(instruction)
+        if state != State.END:
+            raise Parser.ExpectedEndInstructionException()
         return tree

@@ -1,6 +1,7 @@
-from contract_parser.tokens import tokens
-from typing import Iterable, Tuple, List
+from typing import Iterable, List
 
+from contract_parser.Instruction import Instruction
+from contract_parser.tokens import tokens
 from contract_parser.tokens.Token import Token
 
 
@@ -19,10 +20,10 @@ class Node:
                 result.extend(child.str(depth + 1))
         return result
 
-    def flatten(self) -> Iterable[Tuple[Token, str]]:
-        result = [(self.token, None)]
+    def flatten(self) -> Iterable[Instruction]:
+        result: List[Instruction] = [Instruction(self.token)]
         for child in self.children:
             result.extend(child.flatten())
         if not self.is_leaf():
-            result.append((tokens.END_ARGS, None))
+            result.append(Instruction(tokens.END_ARGS))
         return result
