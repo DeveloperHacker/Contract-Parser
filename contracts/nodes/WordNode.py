@@ -1,8 +1,8 @@
 from typing import Iterable
 
-from contract_parser.Instruction import Instruction
-from contract_parser.nodes.Node import Node
-from contract_parser.tokens import tokens
+from contracts.nodes.Node import Node
+from contracts.parser.Instruction import Instruction
+from contracts.tokens import tokens
 
 
 class WordNode(Node):

@@ -1,7 +1,7 @@
-from contract_parser.Parser import Parser
-from contract_parser.nodes.StringNode import StringNode
-from contract_parser.nodes.WordNode import WordNode
-from contract_parser.visitors.AstVisitor import TreeVisitor
+from contracts.nodes.StringNode import StringNode
+from contracts.nodes.WordNode import WordNode
+from contracts.parser.Parser import Parser
+from contracts.visitors.AstVisitor import TreeVisitor
 
 
 def apply_filters(string: str) -> str:

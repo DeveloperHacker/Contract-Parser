@@ -1,12 +1,12 @@
 from typing import List, Iterable
 
-from contract_parser.Instruction import Instruction
-from contract_parser.nodes.Node import Node
-from contract_parser.nodes.RootNode import RootNode
-from contract_parser.nodes.StringNode import StringNode
-from contract_parser.nodes.WordNode import WordNode
-from contract_parser.tokens import tokens
-from contract_parser.visitors.AstVisitor import TreeVisitor
+from contracts.nodes.Node import Node
+from contracts.nodes.RootNode import RootNode
+from contracts.nodes.StringNode import StringNode
+from contracts.nodes.WordNode import WordNode
+from contracts.parser.Instruction import Instruction
+from contracts.tokens import tokens
+from contracts.visitors.AstVisitor import TreeVisitor
 
 
 class TreeCollapser(TreeVisitor):

@@ -3,7 +3,7 @@ from enum import Enum
 
 from typing import Iterable
 
-from contract_parser.tokens.Token import Token
+from contracts.tokens.Token import Token
 
 
 class Type(Enum):

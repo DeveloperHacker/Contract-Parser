@@ -2,17 +2,17 @@ from enum import Enum
 
 from typing import Iterable, List, Tuple
 
-from contract_parser.Instruction import Instruction
-from contract_parser.nodes.Ast import Tree
-from contract_parser.nodes.Node import Node
-from contract_parser.nodes.RootNode import RootNode
-from contract_parser.nodes.StringNode import StringNode
-from contract_parser.nodes.WordNode import WordNode
-from contract_parser.tokens import tokens
-from contract_parser.tokens.FunctionToken import FunctionToken
-from contract_parser.tokens.LabelToken import LabelToken
-from contract_parser.tokens.MarkerToken import MarkerToken
-from contract_parser.tokens.Token import Token
+from contracts.nodes.Ast import Tree
+from contracts.nodes.Node import Node
+from contracts.nodes.RootNode import RootNode
+from contracts.nodes.StringNode import StringNode
+from contracts.nodes.WordNode import WordNode
+from contracts.parser.Instruction import Instruction
+from contracts.tokens import tokens
+from contracts.tokens.FunctionToken import FunctionToken
+from contracts.tokens.LabelToken import LabelToken
+from contracts.tokens.MarkerToken import MarkerToken
+from contracts.tokens.Token import Token
 
 
 class Parser:

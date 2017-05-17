@@ -1,10 +1,10 @@
 from abc import ABCMeta
 
-from contract_parser.nodes.Node import Node
-from contract_parser.nodes.RootNode import RootNode
-from contract_parser.nodes.StringNode import StringNode
-from contract_parser.nodes.Ast import Tree
-from contract_parser.nodes.WordNode import WordNode
+from contracts.nodes.Node import Node
+from contracts.nodes.RootNode import RootNode
+from contracts.nodes.StringNode import StringNode
+from contracts.nodes.Ast import Tree
+from contracts.nodes.WordNode import WordNode
 
 
 class TreeVisitor(metaclass=ABCMeta):

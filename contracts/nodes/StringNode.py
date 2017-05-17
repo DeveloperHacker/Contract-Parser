@@ -1,10 +1,10 @@
 from typing import Iterable, List
 
-from contract_parser.Instruction import Instruction
-from contract_parser.nodes.Node import Node
-from contract_parser.nodes.WordNode import WordNode
-from contract_parser.tokens import tokens
-from contract_parser.tokens.MarkerToken import MarkerToken
+from contracts.nodes.Node import Node
+from contracts.nodes.WordNode import WordNode
+from contracts.parser.Instruction import Instruction
+from contracts.tokens import tokens
+from contracts.tokens.MarkerToken import MarkerToken
 
 
 class StringNode(Node):

@@ -1,7 +1,7 @@
 from typing import Iterable, List
 
-from contract_parser.Instruction import Instruction
-from contract_parser.nodes.Node import Node
+from contracts.nodes.Node import Node
+from contracts.parser.Instruction import Instruction
 
 
 class Tree:

@@ -1,8 +1,8 @@
 from typing import Iterable, List
 
-from contract_parser.Instruction import Instruction
-from contract_parser.tokens import tokens
-from contract_parser.tokens.Token import Token
+from contracts.parser.Instruction import Instruction
+from contracts.tokens import tokens
+from contracts.tokens.Token import Token
 
 
 class Node:

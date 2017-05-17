@@ -1,9 +1,9 @@
+from contracts.Parser import Parser
 from typing import List
 
-from contract_parser.Instruction import Instruction
-from contract_parser.Parser import Parser
-from contract_parser.nodes.Ast import Tree
-from contract_parser.visitors.AstCollapser import TreeCollapser
+from contracts.nodes.Ast import Tree
+from contracts.parser.Instruction import Instruction
+from contracts.visitors.AstCollapser import TreeCollapser
 
 if __name__ == '__main__':
     code = "                not_equal(@param[0], @null)\n" + \

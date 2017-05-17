@@ -1,8 +1,8 @@
 from typing import Iterable, List
 
-from contract_parser.Instruction import Instruction
-from contract_parser.nodes.Node import Node
-from contract_parser.tokens.Token import Token
+from contracts.nodes.Node import Node
+from contracts.parser.Instruction import Instruction
+from contracts.tokens.Token import Token
 
 
 class RootNode(Node):
