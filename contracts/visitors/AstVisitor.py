@@ -1,9 +1,9 @@
 from abc import ABCMeta
 
+from contracts.nodes.Ast import Ast
 from contracts.nodes.Node import Node
 from contracts.nodes.RootNode import RootNode
 from contracts.nodes.StringNode import StringNode
-from contracts.nodes.Ast import Ast
 from contracts.nodes.WordNode import WordNode
 
 

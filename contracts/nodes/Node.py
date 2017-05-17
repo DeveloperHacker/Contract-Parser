@@ -1,7 +1,5 @@
 from typing import Iterable, List
 
-from contracts.parser.Instruction import Instruction
-from contracts.tokens import tokens
 from contracts.tokens.Token import Token
 
 
@@ -13,10 +11,9 @@ class Node:
     def is_leaf(self) -> bool:
         return len(self.children) == 0
 
-    def str(self, depth: int) -> Iterable[str]:
+    def str(self, depth: int) -> List[str]:
         result: List[str] = [" " * depth + self.token.name]
         if not self.is_leaf():
             for child in self.children:
                 result.extend(child.str(depth + 1))
         return result
-

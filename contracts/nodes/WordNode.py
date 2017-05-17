@@ -1,7 +1,6 @@
-from typing import Iterable
+from typing import List
 
 from contracts.nodes.Node import Node
-from contracts.parser.Instruction import Instruction
 from contracts.tokens import tokens
 
 
@@ -10,6 +9,5 @@ class WordNode(Node):
         super().__init__(tokens.WORD)
         self.instance = instance
 
-    def str(self, depth: int) -> Iterable[str]:
+    def str(self, depth: int) -> List[str]:
         return [" " * depth + self.token.name + " ~ " + self.instance]
-

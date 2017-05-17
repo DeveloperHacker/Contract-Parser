@@ -2,8 +2,6 @@ from typing import Iterable, List
 
 from contracts.nodes.Node import Node
 from contracts.nodes.WordNode import WordNode
-from contracts.parser.Instruction import Instruction
-from contracts.tokens import tokens
 from contracts.tokens.MarkerToken import MarkerToken
 
 

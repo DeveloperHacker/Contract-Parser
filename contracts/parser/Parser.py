@@ -1,6 +1,6 @@
 from enum import Enum
 
-from typing import Iterable, List, Tuple
+from typing import List, Tuple
 
 from contracts.nodes.Ast import Ast
 from contracts.nodes.Node import Node
@@ -57,7 +57,7 @@ class Parser:
             super().__init__("expected instruction 'END' at the end of the contract")
 
     @staticmethod
-    def split(source: str) -> Iterable[str]:
+    def split(source: str) -> List[str]:
         splited = []
         delimiters = ("(", ")", ",", " ", "\"", "\n")
         trash_symbols = (" ", ",", "\"", "\n")
@@ -97,7 +97,7 @@ class Parser:
         return len(token) > 0 and token[0] == "\""
 
     @staticmethod
-    def parse(source: str) -> Iterable[Instruction]:
+    def parse(source: str) -> List[Instruction]:
         class State(Enum):
             LABEL = 0
             ARGUMENT = 1
@@ -170,7 +170,7 @@ class Parser:
         return instructions
 
     @staticmethod
-    def tree(instructions: Iterable[Instruction]) -> Ast:
+    def tree(instructions: List[Instruction]) -> Ast:
         class State(Enum):
             LABEL = 0
             ARGUMENT = 1
