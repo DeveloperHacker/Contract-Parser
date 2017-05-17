@@ -7,7 +7,7 @@ from contracts.nodes.Ast import Tree
 from contracts.nodes.WordNode import WordNode
 
 
-class TreeVisitor(metaclass=ABCMeta):
+class AstVisitor(metaclass=ABCMeta):
     @property
     def depth(self):
         return self._depth

@@ -1,7 +1,7 @@
 from contracts.nodes.StringNode import StringNode
 from contracts.nodes.WordNode import WordNode
 from contracts.parser.Parser import Parser
-from contracts.visitors.AstVisitor import TreeVisitor
+from contracts.visitors.AstVisitor import AstVisitor
 
 
 def apply_filters(string: str) -> str:
@@ -9,7 +9,7 @@ def apply_filters(string: str) -> str:
     return "begin {} end".format(string)
 
 
-class StringFiltrator(TreeVisitor):
+class StringFiltrator(AstVisitor):
     def _visit_string(self, node: StringNode):
         string = " ".join(word.instance for word in node.children)
         string = apply_filters(string)

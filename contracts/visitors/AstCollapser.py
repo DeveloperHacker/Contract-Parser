@@ -6,10 +6,10 @@ from contracts.nodes.StringNode import StringNode
 from contracts.nodes.WordNode import WordNode
 from contracts.parser.Instruction import Instruction
 from contracts.tokens import tokens
-from contracts.visitors.AstVisitor import TreeVisitor
+from contracts.visitors.AstVisitor import AstVisitor
 
 
-class TreeCollapser(TreeVisitor):
+class AstCollapser(AstVisitor):
     def __init__(self):
         super().__init__()
         self.instructions: List[Instruction] = None

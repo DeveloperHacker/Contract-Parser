@@ -3,7 +3,7 @@ from typing import List
 
 from contracts.nodes.Ast import Tree
 from contracts.parser.Instruction import Instruction
-from contracts.visitors.AstCollapser import TreeCollapser
+from contracts.visitors.AstCollapser import AstCollapser
 
 if __name__ == '__main__':
     code = "                not_equal(@param[0], @null)\n" + \
@@ -23,6 +23,6 @@ if __name__ == '__main__':
     instructions: List[Instruction] = tree.flatten()
     print("\n".join(str(instruction) for instruction in instructions))
     print()
-    collapser: TreeCollapser = TreeCollapser()
+    collapser: AstCollapser = AstCollapser()
     collapser.accept(tree)
     print("\n".join(str(instruction) for instruction in collapser.instructions))

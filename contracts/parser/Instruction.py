@@ -5,7 +5,7 @@ class Instruction:
     _max_id = 0
 
     def __init__(self, token: Token, word: str = None):
-        self.token: Token = token
+        self.token = token
         self.word: str = word
         Instruction._max_id += 1
         self.id = Instruction._max_id
