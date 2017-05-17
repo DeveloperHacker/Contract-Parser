@@ -2,7 +2,7 @@ from enum import Enum
 
 from typing import Iterable, List, Tuple
 
-from contracts.nodes.Ast import Tree
+from contracts.nodes.Ast import Ast
 from contracts.nodes.Node import Node
 from contracts.nodes.RootNode import RootNode
 from contracts.nodes.StringNode import StringNode
@@ -170,14 +170,14 @@ class Parser:
         return instructions
 
     @staticmethod
-    def tree(instructions: Iterable[Instruction]) -> Tree:
+    def tree(instructions: Iterable[Instruction]) -> Ast:
         class State(Enum):
             LABEL = 0
             ARGUMENT = 1
             STRING = 2
             END = 3
 
-        tree: Tree = Tree()
+        tree: Ast = Ast()
         node: Node = None
         stack: List[Node] = []
         state: State = State.LABEL

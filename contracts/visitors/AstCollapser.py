@@ -12,7 +12,7 @@ from contracts.visitors.AstVisitor import AstVisitor
 class AstCollapser(AstVisitor):
     def __init__(self):
         super().__init__()
-        self.instructions: List[Instruction] = None
+        self.instructions = None
 
     def _insert(self, instruction: Instruction):
         self.instructions.append(instruction)

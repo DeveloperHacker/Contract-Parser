@@ -1,8 +1,8 @@
-from contracts.Parser import Parser
 from typing import List
 
-from contracts.nodes.Ast import Tree
+from contracts.nodes.Ast import Ast
 from contracts.parser.Instruction import Instruction
+from contracts.parser.Parser import Parser
 from contracts.visitors.AstCollapser import AstCollapser
 
 if __name__ == '__main__':
@@ -17,11 +17,8 @@ if __name__ == '__main__':
     instructions: List[Instruction] = Parser.parse(code)
     print("\n".join(str(instruction) for instruction in instructions))
     print()
-    tree: Tree = Parser.tree(instructions)
+    tree: Ast = Parser.tree(instructions)
     print(tree)
-    print()
-    instructions: List[Instruction] = tree.flatten()
-    print("\n".join(str(instruction) for instruction in instructions))
     print()
     collapser: AstCollapser = AstCollapser()
     collapser.accept(tree)

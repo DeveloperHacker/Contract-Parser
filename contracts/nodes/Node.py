@@ -7,7 +7,7 @@ from contracts.tokens.Token import Token
 
 class Node:
     def __init__(self, token: Token = None, children: Iterable['Node'] = None):
-        self.token: Token = token
+        self.token = token
         self.children: List[Node] = [] if children is None else list(children)
 
     def is_leaf(self) -> bool:
@@ -20,10 +20,3 @@ class Node:
                 result.extend(child.str(depth + 1))
         return result
 
-    def flatten(self) -> Iterable[Instruction]:
-        result: List[Instruction] = [Instruction(self.token)]
-        for child in self.children:
-            result.extend(child.flatten())
-        if not self.is_leaf():
-            result.append(Instruction(tokens.END_ARGS))
-        return result

@@ -3,7 +3,7 @@ from abc import ABCMeta
 from contracts.nodes.Node import Node
 from contracts.nodes.RootNode import RootNode
 from contracts.nodes.StringNode import StringNode
-from contracts.nodes.Ast import Tree
+from contracts.nodes.Ast import Ast
 from contracts.nodes.WordNode import WordNode
 
 
@@ -18,7 +18,7 @@ class AstVisitor(metaclass=ABCMeta):
     def accept(self, visitable):
         if self._depth == 0: self._visit()
         self._depth += 1
-        if isinstance(visitable, Tree):
+        if isinstance(visitable, Ast):
             self.accept_tree(visitable)
         elif isinstance(visitable, RootNode):
             self.accept_root_node(visitable)
@@ -33,7 +33,7 @@ class AstVisitor(metaclass=ABCMeta):
         self._depth -= 1
         if self._depth == 0: self._visit_end()
 
-    def accept_tree(self, tree: Tree):
+    def accept_tree(self, tree: Ast):
         self._visit_tree(tree)
         for root in tree.roots:
             self.accept(root)
@@ -72,10 +72,10 @@ class AstVisitor(metaclass=ABCMeta):
         pass
 
     # Tree
-    def _visit_tree(self, tree: Tree):
+    def _visit_tree(self, tree: Ast):
         pass
 
-    def _visit_tree_end(self, tree: Tree):
+    def _visit_tree_end(self, tree: Ast):
         pass
 
     # Node

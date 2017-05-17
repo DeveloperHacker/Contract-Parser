@@ -17,10 +17,3 @@ class StringNode(Node):
             result.extend(child.str(depth + 1))
         result.append(" " * depth + "}")
         return result
-
-    def flatten(self) -> Iterable[Instruction]:
-        result: List[Instruction] = []
-        for child in self.children:
-            result.extend(child.flatten())
-        result.append(Instruction(tokens.END_STRING))
-        return result

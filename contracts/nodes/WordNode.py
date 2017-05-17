@@ -13,5 +13,3 @@ class WordNode(Node):
     def str(self, depth: int) -> Iterable[str]:
         return [" " * depth + self.token.name + " ~ " + self.instance]
 
-    def flatten(self) -> Iterable[Instruction]:
-        return [Instruction(self.token, self.instance)]

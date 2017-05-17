@@ -1,10 +1,9 @@
-from typing import Iterable, List
+from typing import Iterable
 
 from contracts.nodes.Node import Node
-from contracts.parser.Instruction import Instruction
 
 
-class Tree:
+class Ast:
     def __init__(self, roots: Iterable[Node] = None):
         self.roots = [] if roots is None else list(roots)
 
@@ -13,9 +12,3 @@ class Tree:
         for root in self.roots:
             result.extend(root.str(0))
         return "\n".join(result)
-
-    def flatten(self) -> Iterable[Instruction]:
-        result: List[Instruction] = []
-        for root in self.roots:
-            result.extend(root.flatten())
-        return result
