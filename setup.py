@@ -1,9 +1,15 @@
 from distutils.core import setup
 
 setup(
-    name='contract-contracts',
+    name='contracts',
     version='1.0',
-    packages=['contracts', 'contracts.nodes', 'contracts.tokens', 'contracts.parser'],
+    packages=[
+        'contracts',
+        'contracts.nodes',
+        'contracts.tokens',
+        'contracts.parser',
+        'contracts.visitors'
+    ],
     url='https://github.com/DeveloperHacker/contracts',
     license='MIT',
     author='HackerMadCat',
