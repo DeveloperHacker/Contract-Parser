@@ -1,6 +1,7 @@
 from typing import List, Iterable
 
-from contracts.nodes.Node import Node
+from contracts.nodes.MarkerNode import MarkerNode
+from contracts.nodes.PredicateNode import PredicateNode
 from contracts.nodes.RootNode import RootNode
 from contracts.nodes.StringNode import StringNode
 from contracts.nodes.WordNode import WordNode
@@ -9,7 +10,7 @@ from contracts.tokens import tokens
 from contracts.visitors.AstVisitor import AstVisitor
 
 
-class AstCollapser(AstVisitor):
+class AstCompiler(AstVisitor):
     def __init__(self):
         super().__init__()
         self.instructions = None
@@ -39,7 +40,10 @@ class AstCollapser(AstVisitor):
     def _visit(self):
         self.instructions = []
 
-    def _visit_other_node(self, node: Node):
+    def _visit_predicate(self, node: PredicateNode):
+        self._insert(Instruction(node.token))
+
+    def _visit_marker(self, node: MarkerNode):
         self._insert(Instruction(node.token))
 
     def _visit_root(self, node: RootNode):
@@ -48,7 +52,7 @@ class AstCollapser(AstVisitor):
     def _visit_word(self, node: WordNode):
         self._insert(Instruction(node.token, node.instance))
 
-    def _visit_other_node_end(self, node: Node):
+    def _visit_predicate_end(self, node: PredicateNode):
         if not node.is_leaf(): self._insert(Instruction(tokens.END_ARGS))
 
     def _visit_string_end(self, node: StringNode):

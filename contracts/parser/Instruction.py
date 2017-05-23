@@ -11,6 +11,8 @@ class Instruction:
         self.id = Instruction._max_id
 
     def __eq__(self, other):
+        if other is self:
+            return True
         if isinstance(other, Instruction):
             return self.id == other.id
         return NotImplemented

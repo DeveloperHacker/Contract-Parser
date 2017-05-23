@@ -3,5 +3,5 @@ from contracts.tokens.Token import Token
 
 
 class RootNode(Node):
-    def __init__(self, token: Token = None, child: Node = None):
+    def __init__(self, token: Token, child: Node = None):
         super().__init__(token, [child] if child else None)

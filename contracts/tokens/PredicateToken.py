@@ -11,7 +11,7 @@ class Type(Enum):
     VARARG = enum.auto()
 
 
-class FunctionToken(Token):
+class PredicateToken(Token):
     instances = {}
 
     def __init__(self, name: str, arguments: Iterable[Type]):
@@ -19,8 +19,8 @@ class FunctionToken(Token):
         self.arguments = tuple(arguments)
         self.min_num_arguments = len(self.arguments)
         self.max_num_arguments = sum(float("inf") if arg is Type.VARARG else 1 for arg in self.arguments)
-        FunctionToken.instances[name] = self
+        PredicateToken.instances[name] = self
 
     @staticmethod
     def is_function(string: str) -> bool:
-        return string in FunctionToken.instances
+        return string in PredicateToken.instances

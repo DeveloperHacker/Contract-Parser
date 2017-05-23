@@ -3,15 +3,17 @@ from enum import Enum
 from typing import List, Tuple
 
 from contracts.nodes.Ast import Ast
+from contracts.nodes.MarkerNode import MarkerNode
 from contracts.nodes.Node import Node
+from contracts.nodes.PredicateNode import PredicateNode
 from contracts.nodes.RootNode import RootNode
 from contracts.nodes.StringNode import StringNode
 from contracts.nodes.WordNode import WordNode
 from contracts.parser.Instruction import Instruction
 from contracts.tokens import tokens
-from contracts.tokens.FunctionToken import FunctionToken
 from contracts.tokens.LabelToken import LabelToken
 from contracts.tokens.MarkerToken import MarkerToken
+from contracts.tokens.PredicateToken import PredicateToken
 from contracts.tokens.Token import Token
 
 
@@ -37,14 +39,14 @@ class Parser:
             super().__init__(line, "token '{}' wasn't expected".format(token))
 
     class TooManyArgumentsException(ParseException):
-        def __init__(self, line: int, token: FunctionToken, num_arguments: int):
-            text = "too many arguments ib predicate '{}', expected {}, got {}" \
+        def __init__(self, line: int, token: PredicateToken, num_arguments: int):
+            text = "too many arguments in predicate '{}', expected {}, got {}" \
                 .format(token.name, token.max_num_arguments, num_arguments)
             super().__init__(line, text)
 
     class TooFewArgumentsException(ParseException):
-        def __init__(self, line: int, token: FunctionToken, num_arguments: int):
-            text = "too few arguments ib predicate '{}', expected {}, got {}" \
+        def __init__(self, line: int, token: PredicateToken, num_arguments: int):
+            text = "too few arguments in predicate '{}', expected {}, got {}" \
                 .format(token.name, token.min_num_arguments, num_arguments)
             super().__init__(line, text)
 
@@ -59,8 +61,8 @@ class Parser:
     @staticmethod
     def split(source: str) -> List[str]:
         splited = []
-        delimiters = ("(", ")", ",", " ", "\"", "\n")
-        trash_symbols = (" ", ",", "\"", "\n")
+        delimiters = ("(", ")", ",", " ", "\"", "\n", ":")
+        trash_symbols = (" ", ",", "\"", "\n", ":")
         token = []
         start_string = None
         in_str = False
@@ -104,7 +106,7 @@ class Parser:
             INVOKE = 2
 
         instructions: List[Instruction] = []
-        stack: List[Tuple[FunctionToken, int]] = []
+        stack: List[Tuple[PredicateToken, int]] = []
         num_arguments: int = 0
         state: State = State.LABEL
         for line, element in Parser.split(source):
@@ -117,7 +119,7 @@ class Parser:
                 if isinstance(token, LabelToken):
                     instructions.append(Instruction(token))
                     state = State.ARGUMENT
-                elif isinstance(token, FunctionToken):
+                elif isinstance(token, PredicateToken):
                     stack.append((token, num_arguments))
                     instructions.append(Instruction(tokens.UNDEFINED))
                     instructions.append(Instruction(token))
@@ -146,15 +148,15 @@ class Parser:
                         if len(stack) == 0:
                             raise Parser.UnexpectedTokenException(line, element)
                         token, _num_arguments = stack.pop()
-                        if token.max_num_arguments > num_arguments:
+                        if num_arguments > token.max_num_arguments:
                             raise Parser.TooManyArgumentsException(line, token, num_arguments)
-                        if token.min_num_arguments < num_arguments:
+                        if token.min_num_arguments > num_arguments:
                             raise Parser.TooFewArgumentsException(line, token, num_arguments)
                         instructions.append(Instruction(tokens.END_ARGS))
                         num_arguments = _num_arguments
                         if len(stack) == 0:
                             state = State.LABEL
-                    elif isinstance(token, FunctionToken):
+                    elif isinstance(token, PredicateToken):
                         num_arguments += 1
                         stack.append((token, num_arguments))
                         instructions.append(Instruction(token))
@@ -201,13 +203,15 @@ class Parser:
                     node = _node
                     node.children.append(WordNode(instruction.word))
                     state = State.STRING
-                elif isinstance(instruction.token, FunctionToken):
+                elif isinstance(instruction.token, PredicateToken):
                     stack.append(node)
-                    _node = Node(instruction.token)
+                    _node = PredicateNode(instruction.token)
                     node.children.append(_node)
                     node = _node
+                elif isinstance(instruction.token, MarkerToken):
+                    node.children.append(MarkerNode(instruction.token))
                 else:
-                    node.children.append(Node(instruction.token))
+                    raise Parser.UnexpectedInstructionException(instruction)
             elif state == State.STRING:
                 if instruction.token == tokens.END_STRING:
                     node = stack.pop()

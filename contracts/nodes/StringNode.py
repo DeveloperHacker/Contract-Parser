@@ -6,7 +6,7 @@ from contracts.tokens.MarkerToken import MarkerToken
 
 
 class StringNode(Node):
-    def __init__(self, token: MarkerToken = None, children: Iterable[WordNode] = None):
+    def __init__(self, token: MarkerToken, children: Iterable[WordNode] = None):
         super().__init__(token, children)
 
     def str(self, depth: int):

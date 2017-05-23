@@ -1,21 +1,21 @@
 from contracts.tokens.BracketToken import BracketToken
-from contracts.tokens.FunctionToken import FunctionToken, Type
+from contracts.tokens.PredicateToken import PredicateToken, Type
 from contracts.tokens.LabelToken import LabelToken
 
 from contracts.tokens.MarkerToken import MarkerToken
 
 # -------------------- Functions -------------------- #
-EQUAL = FunctionToken("equal", (Type.ARGUMENT, Type.ARGUMENT,))
-NOT_EQUAL = FunctionToken("not_equal", (Type.ARGUMENT, Type.ARGUMENT,))
-IS = FunctionToken("is", (Type.ARGUMENT, Type.ARGUMENT,))
-FOLLOW = FunctionToken("follow", (Type.ARGUMENT, Type.ARGUMENT,))
-MAYBE = FunctionToken("maybe", (Type.ARGUMENT, Type.ARGUMENT,))
-AND = FunctionToken("and", (Type.ARGUMENT, Type.ARGUMENT,))
-OR = FunctionToken("or", (Type.ARGUMENT, Type.ARGUMENT,))
-INSIDE = FunctionToken("inside", (Type.ARGUMENT, Type.VARARG))
-LOWER = FunctionToken("lower", (Type.ARGUMENT, Type.ARGUMENT,))
-GREATER = FunctionToken("greater", (Type.ARGUMENT, Type.ARGUMENT,))
-SATISFY = FunctionToken("satisfy", (Type.ARGUMENT, Type.ARGUMENT,))
+EQUAL = PredicateToken("equal", (Type.ARGUMENT, Type.ARGUMENT,))
+NOT_EQUAL = PredicateToken("not_equal", (Type.ARGUMENT, Type.ARGUMENT,))
+IS = PredicateToken("is", (Type.ARGUMENT, Type.ARGUMENT,))
+FOLLOW = PredicateToken("follow", (Type.ARGUMENT, Type.ARGUMENT,))
+MAYBE = PredicateToken("maybe", (Type.ARGUMENT, Type.ARGUMENT,))
+AND = PredicateToken("and", (Type.ARGUMENT, Type.ARGUMENT,))
+OR = PredicateToken("or", (Type.ARGUMENT, Type.ARGUMENT,))
+INSIDE = PredicateToken("inside", (Type.ARGUMENT, Type.VARARG))
+LOWER = PredicateToken("lower", (Type.ARGUMENT, Type.ARGUMENT,))
+GREATER = PredicateToken("greater", (Type.ARGUMENT, Type.ARGUMENT,))
+SATISFY = PredicateToken("satisfy", (Type.ARGUMENT, Type.ARGUMENT,))
 
 # -------------------- Variables -------------------- #
 NUM_PARAMS = 5
