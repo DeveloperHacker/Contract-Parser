@@ -6,7 +6,7 @@ from contracts.tokens.Token import Token
 class Node:
     def __init__(self, token: Token, children: Iterable['Node'] = None):
         self.token = token
-        self.children: List['Node'] = [] if children is None else list(children)
+        self.children = [] if children is None else list(children)
 
     def is_leaf(self) -> bool:
         return len(self.children) == 0

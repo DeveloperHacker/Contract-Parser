@@ -2,12 +2,12 @@ from typing import Iterable, List
 
 from contracts.nodes.Node import Node
 from contracts.nodes.WordNode import WordNode
-from contracts.tokens.MarkerToken import MarkerToken
+from contracts.tokens import tokens
 
 
 class StringNode(Node):
-    def __init__(self, token: MarkerToken, children: Iterable[WordNode] = None):
-        super().__init__(token, children)
+    def __init__(self, children: Iterable[WordNode] = None):
+        super().__init__(tokens.STRING, children)
 
     def str(self, depth: int):
         result: List[str] = [" " * depth + self.token.name + " {"]

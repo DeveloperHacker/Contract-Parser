@@ -19,22 +19,22 @@ class AstCompiler(AstVisitor):
         self.instructions.append(instruction)
 
     def _insert_before(self, where: Instruction, instruction: Instruction):
-        index: int = self.instructions.index(where)
+        index = self.instructions.index(where)
         self.instructions[index:index] = (instruction,)
 
     def _insert_after(self, where: Instruction, instruction: Instruction):
-        index: int = self.instructions.index(where)
+        index = self.instructions.index(where)
         self.instructions[index + 1:index + 1] = (instruction,)
 
     def _insert_all(self, instructions: List[Instruction]):
         self.instructions.extend(instructions)
 
     def _insert_before_all(self, where: Instruction, instructions: Iterable[Instruction]):
-        index: int = self.instructions.index(where)
+        index = self.instructions.index(where)
         self.instructions[index:index] = instructions
 
     def _insert_after_all(self, where: Instruction, instructions: Iterable[Instruction]):
-        index: int = self.instructions.index(where)
+        index = self.instructions.index(where)
         self.instructions[index + 1:index + 1] = instructions
 
     def _visit(self):
@@ -49,14 +49,11 @@ class AstCompiler(AstVisitor):
     def _visit_root(self, node: RootNode):
         self._insert(Instruction(node.token))
 
+    def _visit_string(self, node: StringNode):
+        self._insert(Instruction(node.token))
+
     def _visit_word(self, node: WordNode):
         self._insert(Instruction(node.token, node.instance))
-
-    def _visit_predicate_end(self, node: PredicateNode):
-        if not node.is_leaf(): self._insert(Instruction(tokens.END_ARGS))
-
-    def _visit_string_end(self, node: StringNode):
-        self._insert(Instruction(tokens.END_STRING))
 
     def _visit_end(self):
         self._insert(Instruction(tokens.END))
