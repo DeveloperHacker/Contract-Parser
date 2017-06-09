@@ -60,8 +60,8 @@ class Parser:
     @staticmethod
     def split(source: str) -> List[str]:
         splited = []
-        delimiters = ("(", ")", ",", " ", "\"", "\n", ":")
-        trash_symbols = (" ", ",", "\"", "\n", ":")
+        delimiters = ("(", ")", ",", " ", "\"", "\n")
+        trash_symbols = (" ", ",", "\"", "\n")
         token = []
         start_string = None
         in_str = False
@@ -118,11 +118,6 @@ class Parser:
                 if isinstance(token, LabelToken):
                     instructions.append(Instruction(token))
                     state = State.ARGUMENT
-                elif isinstance(token, PredicateToken):
-                    stack.append((token, num_arguments))
-                    instructions.append(Instruction(tokens.UNDEFINED))
-                    instructions.append(Instruction(token))
-                    state = State.INVOKE
                 else:
                     raise Parser.UnexpectedTokenException(line, element)
             elif state == State.INVOKE:

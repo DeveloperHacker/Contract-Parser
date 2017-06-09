@@ -17,13 +17,13 @@ class StringFiltrator(AstVisitor):
 
 
 if __name__ == '__main__':
-    code = "                not_equal(@param[0], @null)\n" + \
-           "                not_equal(@param[1], @null)\n" + \
-           "                not_equal(@result, @null)\n" + \
+    code = "                strong not_equal(@param[0], @null)\n" + \
+           "                weak not_equal(@param[1], @null)\n" + \
+           "                strong not_equal(@result, @null)\n" + \
            "                strong equal(\"The bucket is reset\", @true)\n" + \
            "                strong equal(\"The bucket must not be shared\", @true)\n" + \
-           "                equal(\"parsing is not supported\", @false)\n" + \
-           "                equal(\"the text to parse is invalid\", @false)\n"
+           "                strong equal(\"parsing is not supported\", @false)\n" + \
+           "                strong equal(\"the text to parse is invalid\", @false)\n"
 
     instructions = Parser.parse(code)
     tree = Parser.tree(instructions)

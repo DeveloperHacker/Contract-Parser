@@ -68,10 +68,9 @@ END = MarkerToken("@end")
 register(RESULT, PARAM, PARAM_0, PARAM_1, PARAM_2, PARAM_3, PARAM_4, ZERO, WORD, STRING, NULL, TRUE, FALSE, END)
 
 # -------------------- Labels -------------------- #
-UNDEFINED = LabelToken("undefined")
 STRONG = LabelToken("strong")
 WEAK = LabelToken("weak")
-register(UNDEFINED, STRONG, WEAK)
+register(STRONG, WEAK)
 
 # -------------------- Brackets -------------------- #
 LB = "("

@@ -6,13 +6,13 @@ from contracts.parser.Parser import Parser
 from contracts.visitors.AstCompiler import AstCompiler
 
 if __name__ == '__main__':
-    code = "                not_equal(@param[0], @null)\n" + \
-           "                not_equal(@param[1], @null)\n" + \
-           "                not_equal(@result, @null)\n" + \
+    code = "                strong not_equal(@param[0], @null)\n" + \
+           "                weak not_equal(@param[1], @null)\n" + \
+           "                strong not_equal(@result, @null)\n" + \
            "                strong equal(\"The bucket is reset\", @true)\n" + \
            "                strong equal(\"The bucket must not be shared\", @true)\n" + \
-           "                equal(\"parsing is not supported\", @false)\n" + \
-           "                equal(\"the text to parse is invalid\", @false)\n"
+           "                strong equal(\"parsing is not supported\", @false)\n" + \
+           "                strong equal(\"the text to parse is invalid\", @false)\n"
 
     instructions: List[Instruction] = Parser.parse(code)
     print("\n".join(str(instruction) for instruction in instructions))

@@ -33,7 +33,7 @@ class AstDecompiler(AstVisitor):
     def _visit_root_end(self, node: RootNode):
         if len(self.tokens) != 1:
             raise ValueError("Root node have more single child. WTF?")
-        string = "{}: {}".format(node.token.name, self.tokens[0])
+        string = "{} {}".format(node.token.name, self.tokens[0])
         self.tokens = self.stack.pop()
         self.tokens.append(string)
 
