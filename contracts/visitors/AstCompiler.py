@@ -6,7 +6,6 @@ from contracts.nodes.RootNode import RootNode
 from contracts.nodes.StringNode import StringNode
 from contracts.nodes.WordNode import WordNode
 from contracts.parser.Instruction import Instruction
-from contracts.tokens import tokens
 from contracts.visitors.AstVisitor import AstVisitor
 
 
@@ -37,23 +36,20 @@ class AstCompiler(AstVisitor):
         index = self.instructions.index(where)
         self.instructions[index + 1:index + 1] = instructions
 
-    def _visit(self):
+    def visit(self):
         self.instructions = []
 
-    def _visit_predicate(self, node: PredicateNode):
+    def visit_predicate(self, node: PredicateNode):
         self._insert(Instruction(node.token))
 
-    def _visit_marker(self, node: MarkerNode):
+    def visit_marker(self, node: MarkerNode):
         self._insert(Instruction(node.token))
 
-    def _visit_root(self, node: RootNode):
+    def visit_root(self, node: RootNode):
         self._insert(Instruction(node.token))
 
-    def _visit_string(self, node: StringNode):
+    def visit_string(self, node: StringNode):
         self._insert(Instruction(node.token))
 
-    def _visit_word(self, node: WordNode):
+    def visit_word(self, node: WordNode):
         self._insert(Instruction(node.token, node.instance))
-
-    def _visit_end(self):
-        self._insert(Instruction(tokens.END))

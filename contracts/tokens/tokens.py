@@ -1,5 +1,4 @@
 import re
-
 from typing import Dict
 
 from contracts.tokens.LabelToken import LabelToken
@@ -64,8 +63,7 @@ ZERO = MarkerToken("@zero")
 NULL = MarkerToken("@null")
 TRUE = MarkerToken("@true")
 FALSE = MarkerToken("@false")
-END = MarkerToken("@end")
-register(RESULT, PARAM, PARAM_0, PARAM_1, PARAM_2, PARAM_3, PARAM_4, ZERO, WORD, STRING, NULL, TRUE, FALSE, END)
+register(RESULT, PARAM, PARAM_0, PARAM_1, PARAM_2, PARAM_3, PARAM_4, ZERO, WORD, STRING, NULL, TRUE, FALSE)
 
 # -------------------- Labels -------------------- #
 STRONG = LabelToken("strong")

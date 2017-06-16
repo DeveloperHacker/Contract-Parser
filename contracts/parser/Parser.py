@@ -1,8 +1,8 @@
 from enum import Enum
-
 from typing import List, Tuple, Iterator
 
 from contracts.nodes.Ast import Ast
+from contracts.nodes.Forest import Forest
 from contracts.nodes.MarkerNode import MarkerNode
 from contracts.nodes.Node import Node
 from contracts.nodes.PredicateNode import PredicateNode
@@ -53,7 +53,7 @@ class Parser:
         def __init__(self, instruction: Instruction):
             super().__init__("instruction '{}' wasn't expected".format(instruction))
 
-    class ExpectedEndInstructionException(AnalyseException):
+    class UnexpectedEofException(AnalyseException):
         def __init__(self):
             super().__init__("expected instruction 'END' at the end of the contract")
 
@@ -156,7 +156,6 @@ class Parser:
                         raise Parser.UnexpectedTokenException(line, element)
                 else:
                     raise Parser.NotRecognizeException(line, element)
-        instructions.append(Instruction(tokens.END))
         return instructions
 
     @staticmethod
@@ -180,9 +179,9 @@ class Parser:
                 result.append(node)
             else:
                 raise Parser.UnexpectedInstructionException(instruction)
-        for node in result:
-            print(node.str(0))
-        raise Parser.ExpectedEndInstructionException()
+        if len(result) == token.num_arguments:
+            return result, instruction
+        raise Parser.UnexpectedEofException()
 
     @staticmethod
     def parse_string(tail: Iterator[Instruction]) -> (List[WordNode], Instruction):
@@ -193,20 +192,18 @@ class Parser:
                 return result, instruction
             result.append(WordNode(instruction.word))
             instruction = next(tail, None)
-        raise Parser.ExpectedEndInstructionException()
+        raise Parser.UnexpectedEofException()
 
     @staticmethod
-    def tree(instructions: List[Instruction]) -> Ast:
-        tree = Ast()
+    def tree(instructions: List[Instruction]) -> Forest:
+        forest = Forest()
         tail = (instruction for instruction in instructions)
         instruction = next(tail, None)
         while instruction is not None:
-            if instruction.token == tokens.END:
-                break
             if isinstance(instruction.token, LabelToken):
                 root = RootNode(instruction.token)
                 instruction = next(tail, None)
-                tree.roots.append(root)
+                forest.trees.append(Ast(root))
                 if isinstance(instruction.token, PredicateToken):
                     node = PredicateNode(instruction.token)
                     node.children, instruction = Parser.parse_arguments(instruction.token, tail)
@@ -215,6 +212,4 @@ class Parser:
                     raise Parser.UnexpectedInstructionException(instruction)
             else:
                 raise Parser.UnexpectedInstructionException(instruction)
-        if instruction is None:
-            raise Parser.ExpectedEndInstructionException()
-        return tree
+        return forest
