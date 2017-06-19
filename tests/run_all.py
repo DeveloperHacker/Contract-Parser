@@ -1,22 +1,23 @@
 import unittest
 
+from tests import test1, test2, test3, test4, test5
+
 
 class TestCase(unittest.TestCase):
     def test1(self):
-        from tests import test1
         test1.run()
 
     def test2(self):
-        from tests import test2
         test2.run()
 
     def test3(self):
-        from tests import test3
         test3.run()
 
     def test4(self):
-        from tests import test4
         test4.run()
+
+    def test5(self):
+        test5.run()
 
 
 if __name__ == '__main__':

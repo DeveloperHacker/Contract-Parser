@@ -1,17 +1,28 @@
-from typing import Iterable, List
+from typing import List
 
 from contracts.nodes.Node import Node
-from contracts.nodes.WordNode import WordNode
 from contracts.tokens import tokens
 
 
 class StringNode(Node):
-    def __init__(self, children: Iterable[WordNode] = None):
-        super().__init__(tokens.STRING, children)
+    def __init__(self, words: List[str]):
+        super().__init__(tokens.STRING)
+        self.words = words
 
     def str(self, depth: int):
-        result: List[str] = [" " * depth + self.token.name + " {"]
-        for child in self.children:
-            result.extend(child.str(depth + 1))
-        result.append(" " * depth + "}")
+        result: List[str] = [" " * depth + self.token.name + " \"{}\"".format(" ".join(self.words))]
         return result
+
+    def __eq__(self, other):
+        result = not super().__eq__(other)
+        if result is NotImplemented:
+            return result
+        if isinstance(other, StringNode):
+            return self.words == other.words
+        return NotImplemented
+
+    def __ne__(self, other):
+        result = self.__eq__(other)
+        if result is NotImplemented:
+            return result
+        return not result

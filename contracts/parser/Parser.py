@@ -1,19 +1,15 @@
 from enum import Enum
-from typing import List, Tuple, Iterator
+from typing import List, Tuple, Iterator, Dict
 
 from contracts.nodes.Ast import Ast
-from contracts.nodes.Forest import Forest
-from contracts.nodes.MarkerNode import MarkerNode
 from contracts.nodes.Node import Node
-from contracts.nodes.PredicateNode import PredicateNode
-from contracts.nodes.RootNode import RootNode
 from contracts.nodes.StringNode import StringNode
-from contracts.nodes.WordNode import WordNode
 from contracts.parser.Instruction import Instruction
 from contracts.tokens import tokens
 from contracts.tokens.LabelToken import LabelToken
 from contracts.tokens.MarkerToken import MarkerToken
 from contracts.tokens.PredicateToken import PredicateToken
+from contracts.tokens.StringToken import StringToken
 
 
 class Parser:
@@ -55,7 +51,15 @@ class Parser:
 
     class UnexpectedEofException(AnalyseException):
         def __init__(self):
-            super().__init__("expected instruction 'END' at the end of the contract")
+            super().__init__("unexpected the end of the contract")
+
+    class ExpectedEofException(AnalyseException):
+        def __init__(self):
+            super().__init__("expected the end of the contract")
+
+    class StringInstanceNotFoundException(AnalyseException):
+        def __init__(self):
+            super().__init__("instance of string hasn't found")
 
     @staticmethod
     def split(source: str) -> List[str]:
@@ -98,13 +102,15 @@ class Parser:
         return len(token) > 0 and token[0] == "\""
 
     @staticmethod
-    def parse(source: str) -> List[Instruction]:
+    def parse(source: str) -> (List[Tuple[LabelToken, List[Instruction], Dict[int, List[str]]]]):
         class State(Enum):
             LABEL = 0
             ARGUMENT = 1
             INVOKE = 2
 
-        instructions: List[Instruction] = []
+        strings: List[Dict[int, List[str]]] = []
+        instructions: List[List[Instruction]] = []
+        labels: List[LabelToken] = []
         stack: List[Tuple[PredicateToken, int]] = []
         num_arguments: int = 0
         state: State = State.LABEL
@@ -116,7 +122,9 @@ class Parser:
                     raise Parser.NotRecognizeException(line, element)
                 token = tokens.value_of(element)
                 if isinstance(token, LabelToken):
-                    instructions.append(Instruction(token))
+                    instructions.append([])
+                    strings.append({})
+                    labels.append(token)
                     state = State.ARGUMENT
                 else:
                     raise Parser.UnexpectedTokenException(line, element)
@@ -127,9 +135,8 @@ class Parser:
                 num_arguments = 0
             elif state == State.ARGUMENT:
                 if Parser.is_string(element):
-                    instructions.append(Instruction(tokens.STRING))
-                    for word in element[1:].split(" "):
-                        instructions.append(Instruction(tokens.WORD, word))
+                    instructions[-1].append(Instruction(tokens.STRING))
+                    strings[-1][len(instructions[-1]) - 1] = element[1:].split(" ")
                     num_arguments += 1
                 elif element == tokens.RB:
                     if len(stack) == 0:
@@ -147,35 +154,67 @@ class Parser:
                     if isinstance(token, PredicateToken):
                         num_arguments += 1
                         stack.append((token, num_arguments))
-                        instructions.append(Instruction(token))
+                        instructions[-1].append(Instruction(token))
                         state = State.INVOKE
                     elif isinstance(token, MarkerToken):
-                        instructions.append(Instruction(token))
+                        instructions[-1].append(Instruction(token))
                         num_arguments += 1
                     else:
                         raise Parser.UnexpectedTokenException(line, element)
                 else:
                     raise Parser.NotRecognizeException(line, element)
-        return instructions
+        return list(zip(labels, instructions, strings))
 
     @staticmethod
-    def parse_arguments(token: PredicateToken, tail: Iterator[Instruction]) -> (List[Node], Instruction):
+    def parse_tree(label: LabelToken,
+                   instructions: List[Instruction],
+                   strings: Dict[int, List[str]],
+                   collapse_type: str = "dfs") -> Ast:
+        if collapse_type == "dfs":
+            return Parser.dfs_parse_tree(label, instructions, strings)
+        if collapse_type == "bfs":
+            return Parser.bfs_parse_tree(label, instructions, strings)
+        raise ValueError("Collapse type hasn't recognize")
+
+    @staticmethod
+    def dfs_parse_tree(label: LabelToken,
+                       instructions: List[Instruction],
+                       strings: Dict[int, List[str]]) -> Ast:
+        if len(instructions) == 0:
+            Parser.UnexpectedEofException()
+        tail: Iterator[Tuple[int, Instruction]] = enumerate(instructions)
+        idx, instruction = next(tail, (None, None))
+        if not isinstance(instruction.token, PredicateToken):
+            raise Parser.UnexpectedInstructionException(instruction)
+        node = Node(instruction.token)
+        ast = Ast(label, node)
+        node.children, instruction = Parser.parse_arguments(instruction.token, tail, strings)
+        if instruction is not None:
+            raise Parser.ExpectedEofException()
+        return ast
+
+    @staticmethod
+    def parse_arguments(token: PredicateToken,
+                        tail: Iterator[Tuple[int, Instruction]],
+                        strings: Dict[int, List[str]]) -> (List[Node], Instruction):
         result = []
-        instruction = next(tail, None)
+        idx, instruction = next(tail, (None, None))
         while instruction is not None:
             if len(result) == token.num_arguments:
                 return result, instruction
-            if instruction.token == tokens.STRING:
-                node = StringNode()
-                node.children, instruction = Parser.parse_string(tail)
+            if isinstance(instruction.token, StringToken):
+                if idx not in strings:
+                    raise Parser.StringInstanceNotFoundException()
+                node = StringNode(strings[idx])
+                idx, instruction = next(tail, (None, None))
                 result.append(node)
             elif isinstance(instruction.token, PredicateToken):
-                node = PredicateNode(instruction.token)
-                node.children, instruction = Parser.parse_arguments(instruction.token, tail)
+                node = Node(instruction.token)
+                node.children, instruction = Parser.parse_arguments(instruction.token, tail, strings)
                 result.append(node)
             elif isinstance(instruction.token, MarkerToken):
-                node = MarkerNode(instruction.token)
-                instruction = next(tail, None)
+                node = Node(instruction.token)
+                idx, instruction = next(tail, (None, None))
                 result.append(node)
             else:
                 raise Parser.UnexpectedInstructionException(instruction)
@@ -184,32 +223,35 @@ class Parser:
         raise Parser.UnexpectedEofException()
 
     @staticmethod
-    def parse_string(tail: Iterator[Instruction]) -> (List[WordNode], Instruction):
-        result = []
-        instruction = next(tail, None)
-        while instruction is not None:
-            if instruction.token != tokens.WORD:
-                return result, instruction
-            result.append(WordNode(instruction.word))
-            instruction = next(tail, None)
-        raise Parser.UnexpectedEofException()
-
-    @staticmethod
-    def tree(instructions: List[Instruction]) -> Forest:
-        forest = Forest()
-        tail = (instruction for instruction in instructions)
-        instruction = next(tail, None)
-        while instruction is not None:
-            if isinstance(instruction.token, LabelToken):
-                root = RootNode(instruction.token)
-                instruction = next(tail, None)
-                forest.trees.append(Ast(root))
-                if isinstance(instruction.token, PredicateToken):
-                    node = PredicateNode(instruction.token)
-                    node.children, instruction = Parser.parse_arguments(instruction.token, tail)
-                    root.children.append(node)
-                else:
-                    raise Parser.UnexpectedInstructionException(instruction)
+    def bfs_parse_tree(label: LabelToken,
+                       instructions: List[Instruction],
+                       strings: Dict[int, List[str]]) -> Ast:
+        if len(instructions) == 0:
+            Parser.UnexpectedEofException()
+        instruction = instructions[0]
+        token = instruction.token
+        if not isinstance(token, PredicateToken):
+            raise Parser.UnexpectedInstructionException(instruction)
+        node = Node(token)
+        ast = Ast(label, node)
+        parents: List[Node] = [node] * token.num_arguments
+        current_idx = 1
+        while current_idx < len(instructions):
+            parent = parents[current_idx - 1]
+            current = instructions[current_idx]
+            if isinstance(current.token, StringToken):
+                if current_idx not in strings:
+                    raise Parser.StringInstanceNotFoundException()
+                node = StringNode(strings[current_idx])
+                parent.children.append(node)
+            elif isinstance(current.token, PredicateToken):
+                node = Node(current.token)
+                parent.children.append(node)
+                parents.extend([node] * current.token.num_arguments)
+            elif isinstance(current.token, MarkerToken):
+                node = Node(current.token)
+                parent.children.append(node)
             else:
-                raise Parser.UnexpectedInstructionException(instruction)
-        return forest
+                raise Parser.UnexpectedInstructionException(instructions[current_idx])
+            current_idx += 1
+        return ast

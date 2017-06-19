@@ -1,55 +1,53 @@
 from typing import List, Iterable
 
-from contracts.nodes.MarkerNode import MarkerNode
-from contracts.nodes.PredicateNode import PredicateNode
-from contracts.nodes.RootNode import RootNode
+from contracts.nodes.Ast import Ast
+from contracts.nodes.Node import Node
 from contracts.nodes.StringNode import StringNode
-from contracts.nodes.WordNode import WordNode
 from contracts.parser.Instruction import Instruction
+from contracts.tokens.LabelToken import LabelToken
 from contracts.visitors.AstVisitor import AstVisitor
 
 
 class AstCompiler(AstVisitor):
     def __init__(self):
         super().__init__()
-        self.instructions = None
+        self._label = None
+        self._instructions = None
+        self._strings = None
 
     def _insert(self, instruction: Instruction):
-        self.instructions.append(instruction)
+        self._instructions.append(instruction)
 
     def _insert_before(self, where: Instruction, instruction: Instruction):
-        index = self.instructions.index(where)
-        self.instructions[index:index] = (instruction,)
+        index = self._instructions.index(where)
+        self._instructions[index:index] = (instruction,)
 
     def _insert_after(self, where: Instruction, instruction: Instruction):
-        index = self.instructions.index(where)
-        self.instructions[index + 1:index + 1] = (instruction,)
+        index = self._instructions.index(where)
+        self._instructions[index + 1:index + 1] = (instruction,)
 
     def _insert_all(self, instructions: List[Instruction]):
-        self.instructions.extend(instructions)
+        self._instructions.extend(instructions)
 
     def _insert_before_all(self, where: Instruction, instructions: Iterable[Instruction]):
-        index = self.instructions.index(where)
-        self.instructions[index:index] = instructions
+        index = self._instructions.index(where)
+        self._instructions[index:index] = instructions
 
     def _insert_after_all(self, where: Instruction, instructions: Iterable[Instruction]):
-        index = self.instructions.index(where)
-        self.instructions[index + 1:index + 1] = instructions
+        index = self._instructions.index(where)
+        self._instructions[index + 1:index + 1] = instructions
 
-    def visit(self):
-        self.instructions = []
+    def result(self) -> (LabelToken, List[Instruction]):
+        return self._label, self._instructions, self._strings
 
-    def visit_predicate(self, node: PredicateNode):
-        self._insert(Instruction(node.token))
+    def visit(self, ast: Ast):
+        self._label = ast.label
+        self._instructions = []
+        self._strings = {}
 
-    def visit_marker(self, node: MarkerNode):
-        self._insert(Instruction(node.token))
-
-    def visit_root(self, node: RootNode):
+    def visit_node(self, node: Node):
         self._insert(Instruction(node.token))
 
     def visit_string(self, node: StringNode):
-        self._insert(Instruction(node.token))
-
-    def visit_word(self, node: WordNode):
-        self._insert(Instruction(node.token, node.instance))
+        idx = len(self._instructions) - 1
+        self._strings[idx] = node.words

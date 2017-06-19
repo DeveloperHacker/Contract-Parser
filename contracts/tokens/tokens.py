@@ -4,6 +4,7 @@ from typing import Dict
 from contracts.tokens.LabelToken import LabelToken
 from contracts.tokens.MarkerToken import MarkerToken
 from contracts.tokens.PredicateToken import PredicateToken
+from contracts.tokens.StringToken import StringToken
 from contracts.tokens.Token import Token
 
 _instances: Dict[str, Dict[int, 'Token']] = {}
@@ -49,7 +50,7 @@ FOLLOW = PredicateToken("follow", 2)
 MAYBE = PredicateToken("maybe", 2)
 register(LOWER, GREATER, EQUAL, NOT_EQUAL, FOLLOW, MAYBE)
 
-# -------------------- Variables -------------------- #
+# -------------------- Markers -------------------- #
 RESULT = MarkerToken("@result")
 PARAM = MarkerToken("@param")
 PARAM_0 = MarkerToken("@param[0]")
@@ -57,13 +58,15 @@ PARAM_1 = MarkerToken("@param[1]")
 PARAM_2 = MarkerToken("@param[2]")
 PARAM_3 = MarkerToken("@param[3]")
 PARAM_4 = MarkerToken("@param[4]")
-STRING = MarkerToken("@string")
-WORD = MarkerToken("@word")
 ZERO = MarkerToken("@zero")
 NULL = MarkerToken("@null")
 TRUE = MarkerToken("@true")
 FALSE = MarkerToken("@false")
-register(RESULT, PARAM, PARAM_0, PARAM_1, PARAM_2, PARAM_3, PARAM_4, ZERO, WORD, STRING, NULL, TRUE, FALSE)
+register(RESULT, PARAM, PARAM_0, PARAM_1, PARAM_2, PARAM_3, PARAM_4, ZERO, NULL, TRUE, FALSE)
+
+# -------------------- String -------------------- #
+STRING = StringToken("@string")
+register(STRING)
 
 # -------------------- Labels -------------------- #
 STRONG = LabelToken("strong")

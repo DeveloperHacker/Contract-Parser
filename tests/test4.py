@@ -1,35 +1,20 @@
-from typing import List
-
-from contracts.nodes.Forest import Forest
-from contracts.parser.Instruction import Instruction
+from contracts.guides.AstBfsGuide import AstBfsGuide
 from contracts.parser.Parser import Parser
-from contracts.visitors.AstBfsVisitor import AstBfsVisitor
 from contracts.visitors.AstCompiler import AstCompiler
 
 
 def run():
-    code = ("                strong not_equal(@param[0], @null)",
-            "                weak not_equal(@param[1], @null)",
-            "                strong not_equal(@result, @null)",
-            "                strong equal(\"The bucket is reset\", @true)",
-            "                strong equal(\"The bucket must not be shared\", @true)",
-            "                strong equal(\"parsing is not supported\", @false)",
-            "                strong follow(equal(@param[0], @false), not_equal(@param[0], @null))")
-
-    raw_instructions = ("strong",
-                        "follow",
-                        "equal",
-                        "not_equal",
-                        "@param[0]",
-                        "@false",
-                        "@param[0]",
-                        "@null")
-
-    instructions: List[Instruction] = Parser.parse("\n".join(code))
-    tree: Forest = Parser.tree(instructions)
-    visitor = AstBfsVisitor()
-    compiler = AstCompiler()
-    visitor.accept(tree.trees[-1], compiler)
-    instructions = compiler.instructions
+    raw_code = "strong follow(equal(@param[0], @false), not_equal(@param[0], @null))"
+    raw_label = "strong"
+    raw_instructions = ("follow", "equal", "not_equal", "@param[0]", "@false", "@param[0]", "@null")
+    raw_strings = {}
+    parsed = Parser.parse(raw_code)
+    assert len(parsed) == 1
+    tree = Parser.parse_tree(*parsed[-1])
+    guide = AstBfsGuide(AstCompiler())
+    label, instructions, strings = guide.accept(tree)
+    assert label.name == raw_label
     assert len(instructions) == len(raw_instructions)
-    assert all(str(instruct) == raw_instruct for instruct, raw_instruct in zip(instructions, raw_instructions))
+    assert strings == raw_strings
+    for instructions, raw_instructions in zip(instructions, raw_instructions):
+        assert str(instructions) == raw_instructions

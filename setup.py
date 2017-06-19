@@ -8,7 +8,8 @@ setup(
         'contracts.nodes',
         'contracts.tokens',
         'contracts.parser',
-        'contracts.visitors'
+        'contracts.visitors',
+        'contracts.guides'
     ],
     url='https://github.com/DeveloperHacker/contracts',
     license='MIT',
