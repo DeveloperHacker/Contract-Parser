@@ -188,7 +188,7 @@ class Parser:
             raise Parser.UnexpectedInstructionException(instruction)
         node = Node(instruction.token)
         ast = Ast(label, node)
-        node.children, instruction = Parser.parse_arguments(instruction.token, tail, strings)
+        node.children, idx, instruction = Parser.parse_arguments(instruction.token, tail, strings)
         if instruction is not None:
             raise Parser.ExpectedEofException()
         return ast
@@ -201,7 +201,7 @@ class Parser:
         idx, instruction = next(tail, (None, None))
         while instruction is not None:
             if len(result) == token.num_arguments:
-                return result, instruction
+                return result, idx, instruction
             if isinstance(instruction.token, StringToken):
                 if idx not in strings:
                     raise Parser.StringInstanceNotFoundException()
@@ -210,7 +210,7 @@ class Parser:
                 result.append(node)
             elif isinstance(instruction.token, PredicateToken):
                 node = Node(instruction.token)
-                node.children, instruction = Parser.parse_arguments(instruction.token, tail, strings)
+                node.children, idx, instruction = Parser.parse_arguments(instruction.token, tail, strings)
                 result.append(node)
             elif isinstance(instruction.token, MarkerToken):
                 node = Node(instruction.token)
@@ -219,7 +219,7 @@ class Parser:
             else:
                 raise Parser.UnexpectedInstructionException(instruction)
         if len(result) == token.num_arguments:
-            return result, instruction
+            return result, idx, instruction
         raise Parser.UnexpectedEofException()
 
     @staticmethod

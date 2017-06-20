@@ -15,10 +15,4 @@ def run():
     forest = [Parser.parse_tree(*args) for args in parsed]
     guide = AstDfsGuide(AstDecompiler())
     code = [guide.accept(tree) for tree in forest]
-    print()
-    print("+++++++")
-    print("\n".join(code))
-    print("+++++++")
-    print("\n".join(string.strip() for string in raw_code))
-    print("+++++++")
     assert "\n".join(code) == "\n".join(string.strip() for string in raw_code)

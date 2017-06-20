@@ -1,6 +1,6 @@
 import unittest
 
-from tests import test1, test2, test3, test4, test5
+from tests import test1, test2, test3, test4, test5, test6
 
 
 class TestCase(unittest.TestCase):
@@ -19,6 +19,8 @@ class TestCase(unittest.TestCase):
     def test5(self):
         test5.run()
 
+    def test6(self):
+        test6.run()
 
 if __name__ == '__main__':
     unittest.main()
