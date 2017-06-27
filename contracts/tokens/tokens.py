@@ -48,7 +48,8 @@ EQUAL = PredicateToken("equal", 2)
 NOT_EQUAL = PredicateToken("not_equal", 2)
 FOLLOW = PredicateToken("follow", 2)
 MAYBE = PredicateToken("maybe", 2)
-register(LOWER, GREATER, EQUAL, NOT_EQUAL, FOLLOW, MAYBE)
+GET = PredicateToken("get", 2)
+register(LOWER, GREATER, EQUAL, NOT_EQUAL, FOLLOW, MAYBE, GET)
 
 # -------------------- Markers -------------------- #
 RESULT = MarkerToken("@result")
@@ -62,7 +63,10 @@ ZERO = MarkerToken("@zero")
 NULL = MarkerToken("@null")
 TRUE = MarkerToken("@true")
 FALSE = MarkerToken("@false")
-register(RESULT, PARAM, PARAM_0, PARAM_1, PARAM_2, PARAM_3, PARAM_4, ZERO, NULL, TRUE, FALSE)
+THIS = MarkerToken("@this")
+PRE_THIS = MarkerToken("@pre_this")
+POST_THIS = MarkerToken("@post_this")
+register(RESULT, PARAM, PARAM_0, PARAM_1, PARAM_2, PARAM_3, PARAM_4, ZERO, NULL, TRUE, FALSE, THIS, PRE_THIS, POST_THIS)
 
 # -------------------- String -------------------- #
 STRING = StringToken("@string")
