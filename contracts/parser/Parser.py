@@ -61,28 +61,33 @@ class Parser:
         def __init__(self):
             super().__init__("instance of string hasn't found")
 
+    delimiters = ("(", ")", ",", " ", "\n")
+    trash_symbols = (" ", ",", "\n")
+    quotes = ("\"", "'")
+
     @staticmethod
     def split(source: str) -> List[str]:
         splited = []
-        delimiters = ("(", ")", ",", " ", "\"", "\n")
-        trash_symbols = (" ", ",", "\"", "\n")
         token = []
         start_string = None
         in_str = False
+        open_quote = None
         prev = None
         line = 1
         for ch in source:
-            if ch == "\"":
-                if in_str and prev != "\\":
+            if ch in Parser.quotes:
+                if in_str and prev != "\\" and ch == open_quote:
                     in_str = False
+                    open_quote = None
                 elif not in_str:
                     in_str = True
+                    open_quote = ch
                     start_string = line
-            if not in_str and ch in delimiters:
+            if not in_str and ch in (Parser.delimiters + Parser.quotes):
                 token = "".join(token).strip()
                 if len(token) > 0:
                     splited.append((line, token))
-                if ch not in trash_symbols:
+                if ch not in (Parser.trash_symbols + Parser.quotes):
                     splited.append((line, ch))
                 token = []
             else:
@@ -99,7 +104,7 @@ class Parser:
 
     @staticmethod
     def is_string(token: str):
-        return len(token) > 0 and token[0] == "\""
+        return len(token) > 0 and token[0] in Parser.quotes
 
     @staticmethod
     def parse(source: str) -> (List[Tuple[LabelToken, List[Instruction], Dict[int, List[str]]]]):
