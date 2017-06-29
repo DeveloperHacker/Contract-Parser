@@ -4,9 +4,9 @@ from contracts.visitors.AstCompiler import AstCompiler
 
 
 def run():
-    raw_code = "strong follow(equal(@param[0], @false), not_equal(@param[0], @null))"
+    raw_code = "strong follow(equal(param[0], false), not_equal(param[0], null))"
     raw_label = "strong"
-    raw_instructions = ("follow", "equal", "not_equal", "@param[0]", "@false", "@param[0]", "@null")
+    raw_instructions = ("follow", "equal", "not_equal", "param[0]", "false", "param[0]", "null")
     raw_strings = {}
     parsed = Parser.parse(raw_code)
     assert len(parsed) == 1

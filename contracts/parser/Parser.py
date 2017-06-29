@@ -4,6 +4,7 @@ from typing import List, Tuple, Iterator, Dict
 from contracts.nodes.Ast import Ast
 from contracts.nodes.Node import Node
 from contracts.nodes.StringNode import StringNode
+from contracts.parser import grammar
 from contracts.parser.Instruction import Instruction
 from contracts.tokens import tokens
 from contracts.tokens.LabelToken import LabelToken
@@ -260,3 +261,46 @@ class Parser:
                 raise Parser.UnexpectedInstructionException(instructions[current_idx])
             current_idx += 1
         return ast
+
+    @staticmethod
+    def parse_new(code: str) -> List[Ast]:
+        forest = []
+        stack = []
+
+        def parse_operation(_operation):
+            print("operation:", _operation)
+
+        def parse_marker(_marker):
+            print("marker:", _marker)
+
+        def parse_predicate(_predicate):
+            print("predicate:", _predicate)
+
+        def parse_string(_string):
+            print("string:", _string)
+
+        def parse_label(_label):
+            print("label:", _label)
+
+        parser = grammar.build(parse_operation, parse_marker, parse_predicate, parse_string, parse_label)
+        parser.parseString(code)
+        return forest
+
+
+def main():
+    # Parser.parse_new("")
+    # Parser.parse_new("param[0] != null")
+    # Parser.parse_new("strong param[0] != null")
+    # Parser.parse_new("strong param[0] != asd")
+    # Parser.parse_new("strong equal(this.asd, null)")
+    # Parser.parse_new("strong equal(this.asd, (null))")
+    # Parser.parse_new("strong this.field.field")
+    # Parser.parse_new("strong this.field.field == null => result == null")
+    # Parser.parse_new("strong this.field.field == (null => result == null)")
+    # Parser.parse_new("follow(equal(param[0], null), 'in default zone')")
+    # Parser.parse_new("param[0] == null => 'in default zone'")
+    Parser.parse_new("param[0] == null => 'null'\n`result == null => a == true")
+
+
+if __name__ == '__main__':
+    main()

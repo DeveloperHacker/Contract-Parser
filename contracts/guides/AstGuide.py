@@ -15,6 +15,6 @@ class AstGuide(metaclass=ABCMeta):
         self._visitor.visit_end(ast)
         return self._visitor.result()
 
-    @abstractmethod
+    abstractmethod
     def _accept(self, visitable: Node):
         pass
