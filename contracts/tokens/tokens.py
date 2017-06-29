@@ -99,13 +99,14 @@ register(PRE_THIS)
 register(POST_THIS)
 
 # -------------------- String -------------------- #
-STRING = StringToken("@string")
+STRING = StringToken("string")
 register(STRING)
 
 # -------------------- Labels -------------------- #
 STRONG = LabelToken("strong")
 WEAK = LabelToken("weak")
-register(STRONG, WEAK)
+register(STRONG)
+register(WEAK)
 
 # -------------------- Brackets -------------------- #
 LB = "("
