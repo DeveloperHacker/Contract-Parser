@@ -65,7 +65,7 @@ class Parser:
     trash_symbols = (" ", ",", "\n")
     quotes = ("\"", "'")
 
-    @staticmethod
+    staticmethod
     def split(source: str) -> List[str]:
         splited = []
         token = []
@@ -102,11 +102,11 @@ class Parser:
             splited.append((line, token))
         return splited
 
-    @staticmethod
+    staticmethod
     def is_string(token: str):
         return len(token) > 0 and token[0] in Parser.quotes
 
-    @staticmethod
+    staticmethod
     def parse(source: str) -> (List[Tuple[LabelToken, List[Instruction], Dict[int, List[str]]]]):
         class State(Enum):
             LABEL = 0
@@ -170,7 +170,7 @@ class Parser:
                     raise Parser.NotRecognizeException(line, element)
         return list(zip(labels, instructions, strings))
 
-    @staticmethod
+    staticmethod
     def parse_tree(label: LabelToken,
                    instructions: List[Instruction],
                    strings: Dict[int, List[str]],
@@ -181,7 +181,7 @@ class Parser:
             return Parser.bfs_parse_tree(label, instructions, strings)
         raise ValueError("Collapse type hasn't recognize")
 
-    @staticmethod
+    staticmethod
     def dfs_parse_tree(label: LabelToken,
                        instructions: List[Instruction],
                        strings: Dict[int, List[str]]) -> Ast:
@@ -198,7 +198,7 @@ class Parser:
             raise Parser.ExpectedEofException()
         return ast
 
-    @staticmethod
+    staticmethod
     def parse_arguments(token: PredicateToken,
                         tail: Iterator[Tuple[int, Instruction]],
                         strings: Dict[int, List[str]]) -> (List[Node], Instruction):
@@ -227,7 +227,7 @@ class Parser:
             return result, idx, instruction
         raise Parser.UnexpectedEofException()
 
-    @staticmethod
+    staticmethod
     def bfs_parse_tree(label: LabelToken,
                        instructions: List[Instruction],
                        strings: Dict[int, List[str]]) -> Ast:

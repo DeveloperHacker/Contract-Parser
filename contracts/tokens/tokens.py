@@ -16,16 +16,15 @@ def instances():
             yield token.name
 
 
-def register(*tokens):
-    for token in tokens:
-        family_name, index = expand(token.name)
-        if family_name not in _instances:
-            _instances[family_name] = {}
-        _instances[family_name][index] = token
+def register(token: Token):
+    family_name, index = expand(token.name)
+    if family_name not in _instances:
+        _instances[family_name] = {}
+    _instances[family_name][index] = token
 
 
 def expand(string: str) -> (str, int):
-    matched = re.match(r"(@[\w\_]+)\[(.+)\]", string)
+    matched = re.match(r"([\w\_]+)\[(.+)\]", string)
     return matched.groups() if matched else (string, -1)
 
 
@@ -49,33 +48,53 @@ NOT_EQUAL = PredicateToken("not_equal", 2)
 FOLLOW = PredicateToken("follow", 2)
 MAYBE = PredicateToken("maybe", 2)
 GET = PredicateToken("get", 2)
-register(LOWER, GREATER, EQUAL, NOT_EQUAL, FOLLOW, MAYBE, GET)
+register(LOWER)
+register(GREATER)
+register(EQUAL)
+register(NOT_EQUAL)
+register(FOLLOW)
+register(MAYBE)
+register(GET)
 
 # -------------------- Markers -------------------- #
-RESULT = MarkerToken("@result")
-PARAM = MarkerToken("@param")
-PARAM_0 = MarkerToken("@param[0]")
-PARAM_1 = MarkerToken("@param[1]")
-PARAM_2 = MarkerToken("@param[2]")
-PARAM_3 = MarkerToken("@param[3]")
-PARAM_4 = MarkerToken("@param[4]")
-ZERO = MarkerToken("@zero")
-NULL = MarkerToken("@null")
-TRUE = MarkerToken("@true")
-FALSE = MarkerToken("@false")
-THIS = MarkerToken("@this")
-PRE_THIS = MarkerToken("@pre_this")
-POST_THIS = MarkerToken("@post_this")
-register(RESULT, PARAM, PARAM_0, PARAM_1, PARAM_2, PARAM_3, PARAM_4, ZERO, NULL, TRUE, FALSE, THIS, PRE_THIS, POST_THIS)
+RESULT = MarkerToken("result")
+PARAM = MarkerToken("param")
+PARAM_0 = MarkerToken("param[0]")
+PARAM_1 = MarkerToken("param[1]")
+PARAM_2 = MarkerToken("param[2]")
+PARAM_3 = MarkerToken("param[3]")
+PARAM_4 = MarkerToken("param[4]")
+ZERO = MarkerToken("0")
+NULL = MarkerToken("null")
+TRUE = MarkerToken("true")
+FALSE = MarkerToken("false")
+THIS = MarkerToken("this")
+PRE_THIS = MarkerToken("pre_this")
+POST_THIS = MarkerToken("post_this")
+register(RESULT)
+register(PARAM)
+register(PARAM_0)
+register(PARAM_1)
+register(PARAM_2)
+register(PARAM_3)
+register(PARAM_4)
+register(ZERO)
+register(NULL)
+register(TRUE)
+register(FALSE)
+register(THIS)
+register(PRE_THIS)
+register(POST_THIS)
 
 # -------------------- String -------------------- #
-STRING = StringToken("@string")
+STRING = StringToken("string")
 register(STRING)
 
 # -------------------- Labels -------------------- #
 STRONG = LabelToken("strong")
 WEAK = LabelToken("weak")
-register(STRONG, WEAK)
+register(STRONG)
+register(WEAK)
 
 # -------------------- Brackets -------------------- #
 LB = "("

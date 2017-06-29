@@ -14,6 +14,9 @@ setup(
     url='https://github.com/DeveloperHacker/contracts',
     license='MIT',
     author='HackerMadCat',
-    author_email='hacker.mad.cat@gmail.com',
-    description='Tiny contract contracts'
+    author_email='hacker.mad.catgmail.com',
+    description='Tiny contract contracts',
+    install_requires=[
+        'pyparsing'
+    ],
 )
