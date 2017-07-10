@@ -25,6 +25,11 @@ class Ast:
             return result
         return not result
 
-    # noinspection PyMethodMayBeStatic
     def consistent(self) -> bool:
-        return True
+        if self.root is None: return False
+        if self.root.parent is not None: return False
+        if not self.root.consistent(): return False
+        return self.label is not None
+
+    def clone(self) -> 'Ast':
+        return Ast(self.label, self.root.clone())

@@ -1,14 +1,17 @@
 import re
-from typing import Dict
+from typing import Dict, Union
 
 from contracts.tokens.LabelToken import LabelToken
 from contracts.tokens.MarkerToken import MarkerToken
 from contracts.tokens.OperatorToken import OperatorToken
 from contracts.tokens.PredicateToken import PredicateToken
 from contracts.tokens.StringToken import StringToken
+from contracts.tokens.SynonymToken import SynonymToken
 from contracts.tokens.Token import Token
 
-_instances: Dict[str, Dict[int, 'Token']] = {}
+_instances: Dict[str, Dict[int, Token]] = {}
+_op_instances: Dict[str, OperatorToken] = {}
+_syn_instances: Dict[str, Token] = {}
 
 
 def instances():
@@ -18,10 +21,15 @@ def instances():
 
 
 def register(token: Token):
-    family_name, index = expand(token.name)
-    if family_name not in _instances:
-        _instances[family_name] = {}
-    _instances[family_name][index] = token
+    if isinstance(token, SynonymToken):
+        _syn_instances[token.name] = token.meaning
+    elif isinstance(token, OperatorToken):
+        _op_instances[token.name] = token
+    else:
+        family_name, index = expand(token.name)
+        if family_name not in _instances:
+            _instances[family_name] = {}
+        _instances[family_name][index] = token
 
 
 def expand(string: str) -> (str, int):
@@ -34,11 +42,17 @@ def is_token(string: str) -> bool:
     return family_name in _instances
 
 
-def value_of(string: str) -> 'Token':
-    family_name, index = expand(string)
-    if family_name not in _instances: raise ValueError
-    if index not in _instances[family_name]: index = -1
-    return _instances[family_name][index]
+def value_of(string: str) -> Union[Token, None]:
+    if string in _op_instances:
+        return _op_instances[string]
+    elif string in _syn_instances:
+        return _syn_instances[string]
+    else:
+        family_name, index = expand(string)
+        if family_name not in _instances:
+            return None
+        if index not in _instances[family_name]: index = -1
+        return _instances[family_name][index]
 
 
 # -------------------- Functions -------------------- #
@@ -63,10 +77,15 @@ NOT_EQUAL_OP = OperatorToken("!=", NOT_EQUAL)
 MAYBE_OP = OperatorToken("?=", MAYBE)
 LOWER_OP = OperatorToken("<", LOWER)
 GREATER_OP = OperatorToken(">", GREATER)
-LOWER_OR_EQUAL_OP = OperatorToken("<=", (LOWER, EQUAL))
-GREATER_OR_EQUAL_OP = OperatorToken(">=", (GREATER, EQUAL))
 FOLLOW_OP = OperatorToken("=>", FOLLOW)
 GET_OP = OperatorToken(".", GET)
+register(LOWER_OP)
+register(GREATER_OP)
+register(EQUAL_OP)
+register(NOT_EQUAL_OP)
+register(FOLLOW_OP)
+register(MAYBE_OP)
+register(GET_OP)
 
 # -------------------- Markers -------------------- #
 RESULT = MarkerToken("result")
@@ -107,6 +126,10 @@ STRONG = LabelToken("strong")
 WEAK = LabelToken("weak")
 register(STRONG)
 register(WEAK)
+
+# -------------------- Synonyms -------------------- #
+SHORT_WEAK = SynonymToken("`", WEAK)
+register(SHORT_WEAK)
 
 # -------------------- Brackets -------------------- #
 LB = "("

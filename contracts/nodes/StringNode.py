@@ -5,8 +5,8 @@ from contracts.tokens import tokens
 
 
 class StringNode(Node):
-    def __init__(self, words: List[str]):
-        super().__init__(tokens.STRING)
+    def __init__(self, words: List[str], parent: 'Node' = None):
+        super().__init__(tokens.STRING, parent)
         self.words = words
 
     def str(self, depth: int):
@@ -26,3 +26,6 @@ class StringNode(Node):
         if result is NotImplemented:
             return result
         return not result
+
+    def clone(self) -> 'StringNode':
+        return StringNode(list(self.words))

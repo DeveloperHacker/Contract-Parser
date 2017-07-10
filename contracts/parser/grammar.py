@@ -2,7 +2,7 @@ from pyparsing import Word, ZeroOrMore, Forward, Optional, nums, Literal, Keywor
     dblQuotedString, sglQuotedString
 
 
-def build(parse_operation, parse_marker, parse_predicate, parse_string, parse_label):
+def build(parse_operator, parse_marker, parse_predicate, parse_string, parse_label):
     left_bracket = Literal("(")
     right_bracket = Literal(")")
     left_square_bracket = Literal("[")
@@ -62,10 +62,10 @@ def build(parse_operation, parse_marker, parse_predicate, parse_string, parse_la
     string.setParseAction(parse_string)
 
     atom = (left_bracket + expression + right_bracket) | predicate | marker | string
-    attribute = atom + ZeroOrMore((GET_OP + Suppress(string)).setParseAction(parse_operation))
-    equation = attribute + ZeroOrMore((equations + Suppress(attribute)).setParseAction(parse_operation))
-    expression << (equation + ZeroOrMore((FOLLOW_OP + Suppress(equation)).setParseAction(parse_operation)))
-    statement = (Optional(label, default=STRONG) + Suppress(expression)).setParseAction(parse_label)
+    attribute = atom + ZeroOrMore((GET_OP + Suppress(string)).setParseAction(parse_operator))
+    equation = attribute + ZeroOrMore((equations + Suppress(attribute)).setParseAction(parse_operator))
+    expression << (equation + ZeroOrMore((FOLLOW_OP + Suppress(equation)).setParseAction(parse_operator)))
+    statement = (Optional(label, default=STRONG.match) + Suppress(expression)).setParseAction(parse_label)
     code = ZeroOrMore(statement) + StringEnd()
 
     return code

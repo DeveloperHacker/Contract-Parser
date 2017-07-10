@@ -4,9 +4,12 @@ from contracts.tokens.Token import Token
 
 
 class Node:
-    def __init__(self, token: Token, children: Iterable['Node'] = None):
+    def __init__(self, token: Token, children: Iterable['Node'] = None, parent: 'Node' = None):
         self.token = token
+        self.parent = parent
         self.children = [] if children is None else list(children)
+        for child in self.children:
+            child.parent = self
 
     def __eq__(self, other):
         if other is self:
@@ -35,3 +38,13 @@ class Node:
             for child in self.children:
                 result.extend(child.str(depth + 1))
         return result
+
+    def clone(self) -> 'Node':
+        children = (child.clone() for child in self.children)
+        return Node(self.token, children, self.parent)
+
+    def consistent(self) -> bool:
+        for child in self.children:
+            if child.parent != self:
+                return False
+        return True
