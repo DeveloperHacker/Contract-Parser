@@ -1,5 +1,7 @@
 import unittest
 
+from contracts.visitors.AstCompiler import AstCompiler
+
 from contracts.guides.AstDfsGuide import AstDfsGuide
 from contracts.nodes.StringNode import StringNode
 from contracts.parser import Parser
@@ -34,7 +36,9 @@ class TestCase(unittest.TestCase):
                       ("strong", " equal", "  string \"begin The bucket must not be shared end\"", "  true"),
                       ("strong", " equal", "  string \"begin parsing is not supported end\"", "  false"),
                       ("strong", " equal", "  string \"begin the text to parse is invalid end\"", "  false"))
-        parsed = Parser.parse("\n".join(raw_code))
+        forest = Parser.parse("\n".join(raw_code))
+        compiler = AstDfsGuide(AstCompiler())
+        parsed = [compiler.accept(tree) for tree in forest]
         forest = [Parser.parse_tree(*args) for args in parsed]
         assert all(tree.consistent() for tree in forest)
         guide = AstDfsGuide(StringFiltrator())

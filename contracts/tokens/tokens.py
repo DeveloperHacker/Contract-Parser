@@ -9,27 +9,55 @@ from contracts.tokens.StringToken import StringToken
 from contracts.tokens.SynonymToken import SynonymToken
 from contracts.tokens.Token import Token
 
-_instances: Dict[str, Dict[int, Token]] = {}
-_op_instances: Dict[str, OperatorToken] = {}
-_syn_instances: Dict[str, Token] = {}
+_markers: Dict[str, Dict[int, Token]] = {}
+_predicates: Dict[str, PredicateToken] = {}
+_operators: Dict[str, OperatorToken] = {}
+_labels: Dict[str, LabelToken] = {}
+_synonyms: Dict[str, Token] = {}
 
 
-def instances():
-    for family_name, family in _instances.items():
+def predicates():
+    for name, _ in _predicates.items():
+        yield name
+
+
+def markers():
+    for family_name, family in _markers.items():
         for index, token in family.items():
             yield token.name
 
 
+def operators():
+    for name, _ in _operators.items():
+        yield name
+
+
+def labels():
+    for name, _ in _labels.items():
+        yield name
+
+
+def synonyms():
+    for name, _ in _synonyms.items():
+        yield name
+
+
 def register(token: Token):
     if isinstance(token, SynonymToken):
-        _syn_instances[token.name] = token.meaning
+        _synonyms[token.name] = token.meaning
     elif isinstance(token, OperatorToken):
-        _op_instances[token.name] = token
-    else:
+        _operators[token.name] = token
+    elif isinstance(token, LabelToken):
+        _labels[token.name] = token
+    elif isinstance(token, PredicateToken):
+        _predicates[token.name] = token
+    elif isinstance(token, MarkerToken):
         family_name, index = expand(token.name)
-        if family_name not in _instances:
-            _instances[family_name] = {}
-        _instances[family_name][index] = token
+        if family_name not in _markers:
+            _markers[family_name] = {}
+        _markers[family_name][index] = token
+    else:
+        raise ValueError
 
 
 def expand(string: str) -> (str, int):
@@ -37,22 +65,23 @@ def expand(string: str) -> (str, int):
     return matched.groups() if matched else (string, -1)
 
 
-def is_token(string: str) -> bool:
-    family_name, index = expand(string)
-    return family_name in _instances
-
-
 def value_of(string: str) -> Union[Token, None]:
-    if string in _op_instances:
-        return _op_instances[string]
-    elif string in _syn_instances:
-        return _syn_instances[string]
+    if string in _operators:
+        return _operators[string]
+    elif string in _synonyms:
+        return _synonyms[string]
+    elif string in _labels:
+        return _labels[string]
+    elif string in _predicates:
+        return _predicates[string]
+    elif string in _markers:
+        return _markers[string][-1]
     else:
         family_name, index = expand(string)
-        if family_name not in _instances:
+        if family_name not in _markers:
             return None
-        if index not in _instances[family_name]: index = -1
-        return _instances[family_name][index]
+        if index not in _markers[family_name]: index = -1
+        return _markers[family_name][index]
 
 
 # -------------------- Functions -------------------- #
@@ -89,12 +118,6 @@ register(GET_OP)
 
 # -------------------- Markers -------------------- #
 RESULT = MarkerToken("result")
-PARAM = MarkerToken("param")
-PARAM_0 = MarkerToken("param[0]")
-PARAM_1 = MarkerToken("param[1]")
-PARAM_2 = MarkerToken("param[2]")
-PARAM_3 = MarkerToken("param[3]")
-PARAM_4 = MarkerToken("param[4]")
 ZERO = MarkerToken("0")
 NULL = MarkerToken("null")
 TRUE = MarkerToken("true")
@@ -103,12 +126,6 @@ THIS = MarkerToken("this")
 PRE_THIS = MarkerToken("pre_this")
 POST_THIS = MarkerToken("post_this")
 register(RESULT)
-register(PARAM)
-register(PARAM_0)
-register(PARAM_1)
-register(PARAM_2)
-register(PARAM_3)
-register(PARAM_4)
 register(ZERO)
 register(NULL)
 register(TRUE)
@@ -116,6 +133,19 @@ register(FALSE)
 register(THIS)
 register(PRE_THIS)
 register(POST_THIS)
+
+PARAM = MarkerToken("param")
+PARAM_0 = MarkerToken("param[0]")
+PARAM_1 = MarkerToken("param[1]")
+PARAM_2 = MarkerToken("param[2]")
+PARAM_3 = MarkerToken("param[3]")
+PARAM_4 = MarkerToken("param[4]")
+register(PARAM)
+register(PARAM_0)
+register(PARAM_1)
+register(PARAM_2)
+register(PARAM_3)
+register(PARAM_4)
 
 # -------------------- String -------------------- #
 STRING = StringToken("string")

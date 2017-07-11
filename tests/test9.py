@@ -1,7 +1,7 @@
 import unittest
 
 from contracts.guides.AstDfsGuide import AstDfsGuide
-from contracts.parser.Parser import parse_new
+from contracts.parser.Parser import parse
 from contracts.visitors.AstEqualReducer import AstEqualReducer
 
 
@@ -15,7 +15,7 @@ class TestCase(unittest.TestCase):
             "   string \"another string\"",
             "  false"
         )
-        forest = parse_new("`true != equal('this the string', 'another string')")
+        forest = parse("`true != equal('this the string', 'another string')")
         assert len(forest) == 1
         ast = forest[0]
         assert ast.consistent()

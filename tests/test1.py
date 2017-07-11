@@ -28,7 +28,9 @@ class TestCase(unittest.TestCase):
                       ("strong", " equal", "  string \"The bucket must not be shared\"", "  true"),
                       ("strong", " equal", "  string \"parsing is not supported\"", "  false"),
                       ("strong", " equal", "  string \"the text to parse is invalid\"", "  false"))
-        parsed = Parser.parse("\n".join(raw_code))
+        forest = Parser.parse("\n".join(raw_code))
+        compiler = AstDfsGuide(AstCompiler())
+        parsed = [compiler.accept(tree) for tree in forest]
         assert len(parsed) == len(raw_parsed)
         for (label, instructions, strings), (raw_label, raw_instructions, raw_strings) in zip(parsed, raw_parsed):
             assert label.name == raw_label

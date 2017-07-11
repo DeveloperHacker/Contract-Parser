@@ -1,7 +1,7 @@
 import unittest
 
 from contracts.guides.AstDfsGuide import AstDfsGuide
-from contracts.parser.Parser import parse_new, parse_tree
+from contracts.parser.Parser import parse, parse_tree
 from contracts.visitors.AstCompiler import AstCompiler
 from contracts.visitors.AstEqualReducer import AstEqualReducer
 
@@ -9,7 +9,7 @@ from contracts.visitors.AstEqualReducer import AstEqualReducer
 class TestCase(unittest.TestCase):
     def test(self):
         raw_tree = ("strong", " true")
-        forest = parse_new("(false != true) == true")
+        forest = parse("(false != true) == true")
         assert len(forest) == 1
         ast = forest[0]
         assert ast.consistent()

@@ -76,111 +76,111 @@ class StringInstanceNotFoundException(AnalyseException):
 quotes = ("\"", "'")
 
 
-def split(source: str) -> List[str]:
-    delimiters = ("(", ")", ",", " ", "\n")
-    trash_symbols = (" ", ",", "\n")
-
-    splited = []
-    token = []
-    start_string = None
-    in_str = False
-    open_quote = None
-    prev = None
-    line = 1
-    for ch in source:
-        if ch in quotes:
-            if in_str and prev != "\\" and ch == open_quote:
-                in_str = False
-                open_quote = None
-            elif not in_str:
-                in_str = True
-                open_quote = ch
-                start_string = line
-        if not in_str and ch in (delimiters + quotes):
-            token = "".join(token).strip()
-            if len(token) > 0:
-                splited.append((line, token))
-            if ch not in (trash_symbols + quotes):
-                splited.append((line, ch))
-            token = []
-        else:
-            token.append(ch)
-        prev = None if in_str and prev == "\\" else ch
-        if ch == "\n":
-            line += 1
-    if in_str:
-        raise StringNotClosedException(start_string)
-    token = "".join(token).strip()
-    if len(token) > 0:
-        splited.append((line, token))
-    return splited
-
-
-def parse(source: str) -> (List[Tuple[LabelToken, List[Instruction], Dict[int, List[str]]]]):
-    class State(Enum):
-        LABEL = 0
-        ARGUMENT = 1
-        INVOKE = 2
-
-    def is_string(_token: str):
-        return len(_token) > 0 and _token[0] in quotes
-
-    strings: List[Dict[int, List[str]]] = []
-    instructions: List[List[Instruction]] = []
-    labels: List[LabelToken] = []
-    stack: List[Tuple[PredicateToken, int]] = []
-    num_arguments: int = 0
-    state: State = State.LABEL
-    for line, element in split(source):
-        if state == State.LABEL:
-            if is_string(element):
-                raise UnexpectedTokenException(line, element)
-            if not tokens.is_token(element):
-                raise NotRecognizeException(line, element)
-            token = tokens.value_of(element)
-            if isinstance(token, LabelToken):
-                instructions.append([])
-                strings.append({})
-                labels.append(token)
-                state = State.ARGUMENT
-            else:
-                raise UnexpectedTokenException(line, element)
-        elif state == State.INVOKE:
-            if element != tokens.LB:
-                raise UnexpectedTokenException(line, element)
-            state = State.ARGUMENT
-            num_arguments = 0
-        elif state == State.ARGUMENT:
-            if is_string(element):
-                instructions[-1].append(Instruction(tokens.STRING))
-                strings[-1][len(instructions[-1]) - 1] = element[1:].split(" ")
-                num_arguments += 1
-            elif element == tokens.RB:
-                if len(stack) == 0:
-                    raise UnexpectedTokenException(line, element)
-                token, _num_arguments = stack.pop()
-                if num_arguments > token.num_arguments:
-                    raise TooManyArgumentsException(line, token, num_arguments)
-                if token.num_arguments > num_arguments:
-                    raise TooFewArgumentsException(line, token, num_arguments)
-                num_arguments = _num_arguments
-                if len(stack) == 0:
-                    state = State.LABEL
-            elif tokens.is_token(element):
-                token = tokens.value_of(element)
-                if isinstance(token, PredicateToken):
-                    num_arguments += 1
-                    stack.append((token, num_arguments))
-                    instructions[-1].append(Instruction(token))
-                    state = State.INVOKE
-                elif isinstance(token, MarkerToken):
-                    instructions[-1].append(Instruction(token))
-                    num_arguments += 1
-                else:
-                    raise UnexpectedTokenException(line, element)
-            else:
-                raise NotRecognizeException(line, element)
-    return list(zip(labels, instructions, strings))
+# def split(source: str) -> List[str]:
+#     delimiters = ("(", ")", ",", " ", "\n")
+#     trash_symbols = (" ", ",", "\n")
+#
+#     splited = []
+#     token = []
+#     start_string = None
+#     in_str = False
+#     open_quote = None
+#     prev = None
+#     line = 1
+#     for ch in source:
+#         if ch in quotes:
+#             if in_str and prev != "\\" and ch == open_quote:
+#                 in_str = False
+#                 open_quote = None
+#             elif not in_str:
+#                 in_str = True
+#                 open_quote = ch
+#                 start_string = line
+#         if not in_str and ch in (delimiters + quotes):
+#             token = "".join(token).strip()
+#             if len(token) > 0:
+#                 splited.append((line, token))
+#             if ch not in (trash_symbols + quotes):
+#                 splited.append((line, ch))
+#             token = []
+#         else:
+#             token.append(ch)
+#         prev = None if in_str and prev == "\\" else ch
+#         if ch == "\n":
+#             line += 1
+#     if in_str:
+#         raise StringNotClosedException(start_string)
+#     token = "".join(token).strip()
+#     if len(token) > 0:
+#         splited.append((line, token))
+#     return splited
+#
+#
+# def parse(source: str) -> (List[Tuple[LabelToken, List[Instruction], Dict[int, List[str]]]]):
+#     class State(Enum):
+#         LABEL = 0
+#         ARGUMENT = 1
+#         INVOKE = 2
+#
+#     def is_string(_token: str):
+#         return len(_token) > 0 and _token[0] in quotes
+#
+#     strings: List[Dict[int, List[str]]] = []
+#     instructions: List[List[Instruction]] = []
+#     labels: List[LabelToken] = []
+#     stack: List[Tuple[PredicateToken, int]] = []
+#     num_arguments: int = 0
+#     state: State = State.LABEL
+#     for line, element in split(source):
+#         if state == State.LABEL:
+#             if is_string(element):
+#                 raise UnexpectedTokenException(line, element)
+#             if not tokens.is_token(element):
+#                 raise NotRecognizeException(line, element)
+#             token = tokens.value_of(element)
+#             if isinstance(token, LabelToken):
+#                 instructions.append([])
+#                 strings.append({})
+#                 labels.append(token)
+#                 state = State.ARGUMENT
+#             else:
+#                 raise UnexpectedTokenException(line, element)
+#         elif state == State.INVOKE:
+#             if element != tokens.LB:
+#                 raise UnexpectedTokenException(line, element)
+#             state = State.ARGUMENT
+#             num_arguments = 0
+#         elif state == State.ARGUMENT:
+#             if is_string(element):
+#                 instructions[-1].append(Instruction(tokens.STRING))
+#                 strings[-1][len(instructions[-1]) - 1] = element[1:].split(" ")
+#                 num_arguments += 1
+#             elif element == tokens.RB:
+#                 if len(stack) == 0:
+#                     raise UnexpectedTokenException(line, element)
+#                 token, _num_arguments = stack.pop()
+#                 if num_arguments > token.num_arguments:
+#                     raise TooManyArgumentsException(line, token, num_arguments)
+#                 if token.num_arguments > num_arguments:
+#                     raise TooFewArgumentsException(line, token, num_arguments)
+#                 num_arguments = _num_arguments
+#                 if len(stack) == 0:
+#                     state = State.LABEL
+#             elif tokens.is_token(element):
+#                 token = tokens.value_of(element)
+#                 if isinstance(token, PredicateToken):
+#                     num_arguments += 1
+#                     stack.append((token, num_arguments))
+#                     instructions[-1].append(Instruction(token))
+#                     state = State.INVOKE
+#                 elif isinstance(token, MarkerToken):
+#                     instructions[-1].append(Instruction(token))
+#                     num_arguments += 1
+#                 else:
+#                     raise UnexpectedTokenException(line, element)
+#             else:
+#                 raise NotRecognizeException(line, element)
+#     return list(zip(labels, instructions, strings))
 
 
 def parse_tree(label: LabelToken,
@@ -283,7 +283,7 @@ def bfs_parse_instruction(idx: int,
     return node, parents
 
 
-def parse_new(code: str) -> List[Ast]:
+def parse(code: str) -> List[Ast]:
     forest = []
     stack = []
 

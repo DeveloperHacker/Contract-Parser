@@ -1,5 +1,7 @@
 import unittest
 
+from contracts.visitors.AstCompiler import AstCompiler
+
 from contracts.guides.AstDfsGuide import AstDfsGuide
 from contracts.parser import Parser
 from contracts.visitors.AstDecompiler import AstDecompiler
@@ -14,7 +16,9 @@ class TestCase(unittest.TestCase):
                     "  strong equal(\"The bucket must not be shared\", true)",
                     "  strong equal(\"parsing is not supported\", false)",
                     "  strong equal(\"the text to parse is invalid\", false)")
-        parsed = Parser.parse("\n".join(raw_code))
+        forest = Parser.parse("\n".join(raw_code))
+        compiler = AstDfsGuide(AstCompiler())
+        parsed = [compiler.accept(tree) for tree in forest]
         forest = [Parser.parse_tree(*args) for args in parsed]
         assert all(tree.consistent() for tree in forest)
         guide = AstDfsGuide(AstDecompiler())
