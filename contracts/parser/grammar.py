@@ -19,6 +19,8 @@ def build(parse_operator, parse_marker, parse_predicate, parse_string, parse_lab
     GREATER = Keyword("greater")
     FOLLOW = Keyword("follow")
     GET = Keyword("get")
+    LOWER_OR_EQUAL = Keyword("leq")
+    GREATER_OR_EQUAL = Keyword("geq")
 
     # markers
     NULL = Keyword("null")
@@ -50,9 +52,9 @@ def build(parse_operator, parse_marker, parse_predicate, parse_string, parse_lab
     expression = Forward()
 
     label = STRONG | WEAK | SHORT_WEAK
-    equations = EQUAL_OP | NOT_EQUAL_OP | MAYBE_OP | LOWER_OP | GREATER_OP | LOWER_OR_EQUAL_OP | GREATER_OR_EQUAL_OP
+    equations = LOWER_OR_EQUAL_OP | GREATER_OR_EQUAL_OP | EQUAL_OP | NOT_EQUAL_OP | MAYBE_OP | LOWER_OP | GREATER_OP
     marker = NULL | TRUE | FALSE | PARAM | RESULT | ZERO | THIS | PRE_THIS | POST_THIS
-    predicates = EQUAL | NOT_EQUAL | MAYBE | LOWER | GREATER | FOLLOW | GET
+    predicates = EQUAL | NOT_EQUAL | MAYBE | LOWER | GREATER | FOLLOW | GET | LOWER_OR_EQUAL | GREATER_OR_EQUAL
 
     predicate_arguments = (expression + ZeroOrMore(comma + expression)) | Optional(expression)
     predicate = predicates + Suppress(left_bracket + predicate_arguments + right_bracket)
