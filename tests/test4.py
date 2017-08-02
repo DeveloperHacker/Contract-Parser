@@ -11,7 +11,7 @@ class TestCase(unittest.TestCase):
     def test(self):
         raw_code = "strong follow(equal(param[0], false), not_equal(param[0], null))"
         raw_label = "strong"
-        raw_instructions = ("follow", "equal", "not_equal", "param[0]", "false", "param[0]", "null")
+        raw_tokens = ("follow", "equal", "not_equal", "param[0]", "false", "param[0]", "null")
         raw_strings = {}
         forest = Parser.parse(raw_code)
         compiler = AstDfsGuide(AstCompiler())
@@ -20,9 +20,9 @@ class TestCase(unittest.TestCase):
         tree = Parser.parse_tree(*parsed[-1])
         assert tree.consistent()
         guide = AstBfsGuide(AstCompiler())
-        label, instructions, strings = guide.accept(tree)
+        label, tokens, strings = guide.accept(tree)
         assert label.name == raw_label
-        assert len(instructions) == len(raw_instructions)
+        assert len(tokens) == len(raw_tokens)
         assert strings == raw_strings
-        for instructions, raw_instructions in zip(instructions, raw_instructions):
-            assert str(instructions) == raw_instructions
+        for token, raw_token in zip(tokens, raw_tokens):
+            assert token.name == raw_token

@@ -1,24 +1,20 @@
 import unittest
 
 from contracts.guides.AstDfsGuide import AstDfsGuide
-from contracts.parser.Parser import parse, parse_tree
+from contracts.parser import Parser
 from contracts.visitors.AstCompiler import AstCompiler
-from contracts.visitors.AstEqualReducer import AstEqualReducer
 
 
 class TestCase(unittest.TestCase):
     def test(self):
-        raw_tree = ("strong", " true")
-        forest = parse("(false != true) == true")
-        assert len(forest) == 1
-        ast = forest[0]
-        assert ast.consistent()
-        reducer = AstDfsGuide(AstEqualReducer())
-        reducer.accept(ast)
-        assert str(ast) == "\n".join(raw_tree)
+        raw_code = ("strong 'the field' is 'supported'",
+                    "strong 'the field' is not 'supported'")
+        raw_tree = (("strong", " is", "  string \"the field\"", "  string \"supported\""),
+                    ("strong", " is_not", "  string \"the field\"", "  string \"supported\""))
+        forest = Parser.parse("\n".join(raw_code))
         compiler = AstDfsGuide(AstCompiler())
-        args = compiler.accept(ast)
-        ast = parse_tree(*args, collapse_type="dfs")
-        assert ast.consistent()
-        ast = parse_tree(*args, collapse_type="bfs")
-        assert ast.consistent()
+        parsed = [compiler.accept(tree) for tree in forest]
+        forest = [Parser.parse_tree(*args) for args in parsed]
+        for tree, raw_tree in zip(forest, raw_tree):
+            assert tree.consistent()
+            assert str(tree) == "\n".join(raw_tree)

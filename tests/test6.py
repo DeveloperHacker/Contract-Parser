@@ -8,12 +8,7 @@ from contracts.visitors.AstCompiler import AstCompiler
 class TestCase(unittest.TestCase):
     def test(self):
         raw_code = " strong follow(equal(param[0], null), \"in default zone\")"
-        raw_tree = ("strong",
-                    " follow",
-                    "  equal",
-                    "   param[0]",
-                    "   null",
-                    "  string \"in default zone\"")
+        raw_tree = ("strong", " follow", "  equal", "   param[0]", "   null", "  string \"in default zone\"")
         forest = Parser.parse(raw_code)
         compiler = AstDfsGuide(AstCompiler())
         parsed = [compiler.accept(tree) for tree in forest]

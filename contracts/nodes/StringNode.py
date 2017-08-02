@@ -1,12 +1,12 @@
 from typing import List
 
 from contracts.nodes.Node import Node
-from contracts.tokens import tokens
+from contracts.tokens import Markers
 
 
 class StringNode(Node):
     def __init__(self, words: List[str], parent: 'Node' = None):
-        super().__init__(tokens.STRING, parent)
+        super().__init__(Markers.STRING, parent)
         self.words = words
 
     def str(self, depth: int):

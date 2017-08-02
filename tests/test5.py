@@ -17,6 +17,6 @@ class TestCase(unittest.TestCase):
         tree = Parser.parse_tree(*parsed[-1])
         assert tree.consistent()
         guide = AstBfsGuide(AstCompiler())
-        label, instructions, strings = guide.accept(tree)
-        reverted_tree = Parser.parse_tree(label, instructions, strings, collapse_type="bfs")
+        label, tokens, strings = guide.accept(tree)
+        reverted_tree = Parser.parse_tree(label, tokens, strings, bypass="bfs")
         assert reverted_tree == tree

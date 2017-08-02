@@ -1,73 +1,38 @@
-from pyparsing import Word, ZeroOrMore, Forward, Optional, nums, Literal, Keyword, Combine, StringEnd, alphas, Suppress, \
-    dblQuotedString, sglQuotedString
+from pyparsing import Word, ZeroOrMore, Forward, Optional, Literal, Keyword, StringEnd, alphas, Suppress, \
+    quotedString, MatchFirst, And, Combine, nums
+
+from contracts.tokens import Predicates, Labels, Synonyms, Operators, Markers
 
 
 def build(parse_operator, parse_marker, parse_predicate, parse_string, parse_label):
-    left_bracket = Literal("(")
-    right_bracket = Literal(")")
-    left_square_bracket = Literal("[")
-    right_square_bracket = Literal("]")
-    comma = Literal(",")
-    number = Word(nums)
-    string = dblQuotedString() | sglQuotedString() | Word(alphas)
-
-    # predicates
-    EQUAL = Keyword("equal")
-    NOT_EQUAL = Keyword("not_equal")
-    MAYBE = Keyword("maybe")
-    LOWER = Keyword("lower")
-    GREATER = Keyword("greater")
-    FOLLOW = Keyword("follow")
-    GET = Keyword("get")
-    LOWER_OR_EQUAL = Keyword("leq")
-    GREATER_OR_EQUAL = Keyword("geq")
-
-    # markers
-    NULL = Keyword("null")
-    TRUE = Keyword("true")
-    FALSE = Keyword("false")
-    PARAM = Combine(Keyword("param") + left_square_bracket + number + right_square_bracket)
-    RESULT = Keyword("result")
-    ZERO = Keyword("0")
-    THIS = Keyword("this")
-    PRE_THIS = Keyword("pre_this")
-    POST_THIS = Keyword("post_this")
-
-    # labels
-    STRONG = Keyword("strong")
-    WEAK = Keyword("weak")
-    SHORT_WEAK = Literal("`")
-
-    # operators
-    EQUAL_OP = Literal("==")
-    NOT_EQUAL_OP = Literal("!=")
-    MAYBE_OP = Literal("?=")
-    LOWER_OP = Literal("<")
-    GREATER_OP = Literal(">")
-    LOWER_OR_EQUAL_OP = Literal("<=")
-    GREATER_OR_EQUAL_OP = Literal(">=")
-    FOLLOW_OP = Literal("=>")
-    GET_OP = Literal(".")
-
     expression = Forward()
 
-    label = STRONG | WEAK | SHORT_WEAK
-    equations = LOWER_OR_EQUAL_OP | GREATER_OR_EQUAL_OP | EQUAL_OP | NOT_EQUAL_OP | MAYBE_OP | LOWER_OP | GREATER_OP
-    marker = NULL | TRUE | FALSE | PARAM | RESULT | ZERO | THIS | PRE_THIS | POST_THIS
-    predicates = EQUAL | NOT_EQUAL | MAYBE | LOWER | GREATER | FOLLOW | GET | LOWER_OR_EQUAL | GREATER_OR_EQUAL
+    string = quotedString().setParseAction(parse_string)
+    attribute_name = Word(alphas).setParseAction(parse_string)
 
-    predicate_arguments = (expression + ZeroOrMore(comma + expression)) | Optional(expression)
-    predicate = predicates + Suppress(left_bracket + predicate_arguments + right_bracket)
+    label = MatchFirst(Keyword(name) for name in Labels.names) | Synonyms.SHORT_WEAK.name
 
+    escape = (Operators.GET.name, Operators.IS.name, Operators.IS_NOT.name)
+    operator = MatchFirst(Literal(name) for name in Operators.names if name not in escape)
+    # operator |= Keyword(Operators.IS_NOT.name)
+    operator |= And(Keyword(word) for word in Operators.IS_NOT.name.split(" "))
+    operator |= Keyword(Operators.IS.name)
+
+    escape = (Markers.PARAM.name, Markers.PARAM_0.name,
+              Markers.PARAM_1.name, Markers.PARAM_2.name,
+              Markers.PARAM_3.name, Markers.PARAM_4.name)
+    marker = MatchFirst(Keyword(name) for name in Markers.names if name not in escape)
+    marker |= Combine(Keyword(Markers.PARAM.name) + "[" + Word(nums) + "]")
     marker.setParseAction(parse_marker)
-    predicate.setParseAction(parse_predicate)
-    string.setParseAction(parse_string)
 
-    atom = (left_bracket + expression + right_bracket) | predicate | marker | string
-    attribute = atom + ZeroOrMore((GET_OP + Suppress(string)).setParseAction(parse_operator))
-    equation = attribute + ZeroOrMore((equations + Suppress(attribute)).setParseAction(parse_operator))
-    expression << (equation + ZeroOrMore((FOLLOW_OP + Suppress(equation)).setParseAction(parse_operator)))
-    statement = (Optional(label, default=STRONG.match) + Suppress(expression)).setParseAction(parse_label)
-    code = ZeroOrMore(statement) + StringEnd()
+    predicate_name = MatchFirst(Keyword(name) for name in Predicates.instances.keys())
+    predicate_arguments = (expression + ZeroOrMore("," + expression)) | Optional(expression)
+    predicate = (predicate_name + Suppress("(" + predicate_arguments + ")")).setParseAction(parse_predicate)
 
-    return code
+    # noinspection PyUnresolvedReferences
+    atom = ("(" + expression + ")") | predicate | marker | string
+    attribute = atom + ZeroOrMore((Operators.GET.name + Suppress(attribute_name)).setParseAction(parse_operator))
+    expression << attribute + ZeroOrMore((operator + Suppress(attribute)).setParseAction(parse_operator))
+    statement = (Optional(label, Labels.STRONG.name) + Suppress(expression)).setParseAction(parse_label)
+
+    return ZeroOrMore(statement) + StringEnd()

@@ -32,21 +32,20 @@ class TestCase(unittest.TestCase):
         compiler = AstDfsGuide(AstCompiler())
         parsed = [compiler.accept(tree) for tree in forest]
         assert len(parsed) == len(raw_parsed)
-        for (label, instructions, strings), (raw_label, raw_instructions, raw_strings) in zip(parsed, raw_parsed):
+        for (label, tokens, strings), (raw_label, raw_tokens, raw_strings) in zip(parsed, raw_parsed):
             assert label.name == raw_label
             assert strings == raw_strings
-            for instruction, raw_instruction in zip(instructions, raw_instructions):
-                assert str(instruction) == raw_instruction
+            for token, raw_token in zip(tokens, raw_tokens):
+                assert token.name == raw_token, "%s %s" % (token.name, raw_token)
         forest = [Parser.parse_tree(*args) for args in parsed]
         assert all(tree.consistent() for tree in forest)
         assert len(forest) == len(raw_forest)
         for tree, raw_tree in zip(forest, raw_forest):
             assert str(tree) == "\n".join(raw_tree)
-        guide = AstDfsGuide(AstCompiler())
-        parsed = [guide.accept(tree) for tree in forest]
+        parsed = [compiler.accept(tree) for tree in forest]
         assert len(parsed) == len(raw_parsed)
-        for (label, instructions, strings), (raw_label, raw_instructions, raw_strings) in zip(parsed, raw_parsed):
+        for (label, tokens, strings), (raw_label, raw_tokens, raw_strings) in zip(parsed, raw_parsed):
             assert label.name == raw_label
             assert strings == raw_strings
-            for instruction, raw_instruction in zip(instructions, raw_instructions):
-                assert str(instruction) == raw_instruction
+            for token, raw_token in zip(tokens, raw_tokens):
+                assert token.name == raw_token
