@@ -1,6 +1,3 @@
-import re
-from typing import Union
-
 from contracts.tokens import Labels
 from contracts.tokens import Markers
 from contracts.tokens import Operators
@@ -12,11 +9,6 @@ from contracts.tokens.OperatorToken import OperatorToken
 from contracts.tokens.PredicateToken import PredicateToken
 from contracts.tokens.SynonymToken import SynonymToken
 from contracts.tokens.Token import Token
-
-
-def _expand(string: str) -> (str, int):
-    matched = re.match(r"([\w\_]+)\[(.+)\]", string)
-    return matched.groups() if matched else (string, -1)
 
 
 def register(token: Token):
@@ -33,7 +25,7 @@ def register(token: Token):
         Predicates.instances[token.name] = token
         Predicates.names.append(token.name)
     elif isinstance(token, MarkerToken):
-        family_name, index = _expand(token.name)
+        family_name, index = Markers._expand(token.name)
         if family_name not in Markers.instances:
             Markers.instances[family_name] = {}
         Markers.instances[family_name][index] = token
@@ -42,68 +34,60 @@ def register(token: Token):
         raise ValueError
 
 
-def value_of(string: str) -> Union[Token, None]:
-    if string in Operators.instances:
-        return Operators.instances[string]
-    elif string in Synonyms.instances:
-        return Synonyms.instances[string]
-    elif string in Labels.instances:
-        return Labels.instances[string]
-    elif string in Predicates.instances:
-        return Predicates.instances[string]
-    elif string in Markers.instances:
-        return Markers.instances[string][-1]
-    else:
-        family_name, index = _expand(string)
-        if family_name not in Markers.instances:
-            return None
-        if index not in Markers.instances[family_name]: index = -1
-        return Markers.instances[family_name][index]
+def __lazy_function(func):
+    _object = {}
+
+    def _function(*args, **kwargs):
+        if "instance" not in _object:
+            _object["instance"] = func(*args, **kwargs)
+        return _object["instance"]
+
+    return _function
 
 
-register(Predicates.GET)
-register(Predicates.EQUAL)
-register(Predicates.NOT_EQUAL)
-register(Predicates.MAYBE)
-register(Predicates.LOWER_OR_EQUAL)
-register(Predicates.GREATER_OR_EQUAL)
-register(Predicates.LOWER)
-register(Predicates.GREATER)
-register(Predicates.FOLLOW)
-register(Predicates.IS)
-register(Predicates.IS_NOT)
+@__lazy_function
+def register_all_tokens():
+    register(Predicates.GET)
+    register(Predicates.EQUAL)
+    register(Predicates.NOT_EQUAL)
+    register(Predicates.MAY)
+    register(Predicates.LOWER_OR_EQUAL)
+    register(Predicates.LOWER)
+    register(Predicates.FOLLOW)
+    register(Predicates.IS)
+    register(Predicates.IS_NOT)
 
-register(Operators.GET)
-register(Operators.EQUAL)
-register(Operators.NOT_EQUAL)
-register(Operators.MAYBE)
-register(Operators.LOWER_OR_EQUAL)
-register(Operators.GREATER_OR_EQUAL)
-register(Operators.LOWER)
-register(Operators.GREATER)
-register(Operators.FOLLOW)
-register(Operators.IS)
-register(Operators.IS_NOT)
+    register(Operators.GET)
+    register(Operators.EQUAL)
+    register(Operators.NOT_EQUAL)
+    register(Operators.MAY)
+    register(Operators.LOWER_OR_EQUAL)
+    register(Operators.LOWER)
+    register(Operators.FOLLOW)
+    register(Operators.IS)
+    register(Operators.IS_NOT)
 
-register(Markers.RESULT)
-register(Markers.ZERO)
-register(Markers.NULL)
-register(Markers.TRUE)
-register(Markers.FALSE)
-register(Markers.THIS)
-register(Markers.PRE_THIS)
-register(Markers.POST_THIS)
+    register(Markers.RESULT)
+    register(Markers.ZERO)
+    register(Markers.NULL)
+    register(Markers.TRUE)
+    register(Markers.FALSE)
+    register(Markers.THIS)
+    register(Markers.PRE_THIS)
+    register(Markers.POST_THIS)
 
-register(Markers.PARAM_4)
-register(Markers.PARAM_3)
-register(Markers.PARAM_2)
-register(Markers.PARAM_1)
-register(Markers.PARAM_0)
-register(Markers.PARAM)
+    register(Markers.PARAM_4)
+    register(Markers.PARAM_3)
+    register(Markers.PARAM_2)
+    register(Markers.PARAM_1)
+    register(Markers.PARAM_0)
+    register(Markers.PARAM)
 
-register(Markers.STRING)
+    register(Markers.STRING)
 
-register(Labels.STRONG)
-register(Labels.WEAK)
+    register(Labels.STRONG)
+    register(Labels.WEAK)
+    register(Labels.SHORT_WEAK)
 
-register(Synonyms.SHORT_WEAK)
+
+register_all_tokens()

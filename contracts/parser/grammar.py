@@ -1,7 +1,7 @@
 from pyparsing import Word, ZeroOrMore, Forward, Optional, Literal, Keyword, StringEnd, alphas, Suppress, \
     quotedString, MatchFirst, And, Combine, nums
 
-from contracts.tokens import Predicates, Labels, Synonyms, Operators, Markers
+from contracts.tokens import Predicates, Labels, Operators, Markers
 
 
 def build(parse_operator, parse_marker, parse_predicate, parse_string, parse_label):
@@ -10,7 +10,7 @@ def build(parse_operator, parse_marker, parse_predicate, parse_string, parse_lab
     string = quotedString().setParseAction(parse_string)
     attribute_name = Word(alphas).setParseAction(parse_string)
 
-    label = MatchFirst(Keyword(name) for name in Labels.names) | Synonyms.SHORT_WEAK.name
+    label = MatchFirst(Keyword(name) for name in Labels.names) | Labels.SHORT_WEAK.name
 
     escape = (Operators.GET.name, Operators.IS.name, Operators.IS_NOT.name)
     operator = MatchFirst(Literal(name) for name in Operators.names if name not in escape)

@@ -1,10 +1,10 @@
-from typing import List, Tuple, Iterator, Dict
+from typing import List, Dict
 
 from contracts.nodes.Ast import Ast
 from contracts.nodes.Node import Node
 from contracts.nodes.StringNode import StringNode
 from contracts.parser import grammar
-from contracts.tokens import Tokens
+from contracts.tokens import Tokens, Labels, Predicates, Markers, Operators
 from contracts.tokens.LabelToken import LabelToken
 from contracts.tokens.MarkerToken import MarkerToken
 from contracts.tokens.OperatorToken import OperatorToken
@@ -104,12 +104,13 @@ def bfs_parse_tree(label: LabelToken, tokens: List[Token], strings: Dict[int, Li
 
 
 def parse(code: str) -> List[Ast]:
+    Tokens.register_all_tokens()
     forest = []
     stack = []
 
     def parse_operator(operator):
         operator = " ".join(operator)
-        token = Tokens.value_of(operator)
+        token = Operators.value_of(operator)
         assert isinstance(token, OperatorToken)
         token = token.predicate
         assert len(stack) >= token.num_arguments
@@ -119,14 +120,14 @@ def parse(code: str) -> List[Ast]:
 
     def parse_marker(marker):
         marker = marker[0]
-        token = Tokens.value_of(marker)
+        token = Markers.value_of(marker)
         assert isinstance(token, MarkerToken)
         node = Node(token)
         stack.append(node)
 
     def parse_predicate(predicate):
         predicate = predicate[0]
-        token = Tokens.value_of(predicate)
+        token = Predicates.value_of(predicate)
         assert isinstance(token, PredicateToken)
         assert len(stack) >= token.num_arguments
         node = Node(token, stack[-token.num_arguments:])
@@ -144,7 +145,7 @@ def parse(code: str) -> List[Ast]:
 
     def parse_label(label):
         label = label[0]
-        token = Tokens.value_of(label)
+        token = Labels.value_of(label)
         assert isinstance(token, LabelToken)
         assert len(stack) == 1
         ast = Ast(token, stack[0])
