@@ -35,3 +35,7 @@ class TestCase(unittest.TestCase):
         assert all(tree.consistent() for tree in forest)
         forest = parse("param[0] ?= 'negative'")
         assert all(tree.consistent() for tree in forest)
+        forest = parse("'1' <= param[1] && param[1] <= '12'")
+        assert all(tree.consistent() for tree in forest)
+        forest = parse("'1' <= param[1] && param[1] <= '12' || '1' <= param[2] && param[2] <= '31'")
+        assert all(tree.consistent() for tree in forest)

@@ -9,8 +9,8 @@ class TestCase(unittest.TestCase):
     def test(self):
         raw_code = ("strong 'the field' is 'supported'",
                     "strong 'the field' is not 'supported'")
-        raw_tree = (("strong", " is", "  string \"the field\"", "  string \"supported\""),
-                    ("strong", " is_not", "  string \"the field\"", "  string \"supported\""))
+        raw_tree = (("strong", " is_", "  \"the field\"", "  \"supported\""),
+                    ("strong", " is_not", "  \"the field\"", "  \"supported\""))
         forest = Parser.parse("\n".join(raw_code))
         compiler = AstDfsGuide(AstCompiler())
         parsed = [compiler.accept(tree) for tree in forest]

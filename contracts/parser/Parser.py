@@ -57,7 +57,7 @@ def dfs_parse_tree(label: LabelToken, tokens: List[Token], strings: Dict[int, Li
             node = StringNode(strings[index])
         elif isinstance(token, PredicateToken):
             children = [parse_token() for _ in range(token.num_arguments)]
-            node = Node(token, children)
+            node = Node(token, children=children)
         elif isinstance(token, MarkerToken):
             node = Node(token)
         else:
@@ -114,7 +114,7 @@ def parse(code: str) -> List[Ast]:
         assert isinstance(token, OperatorToken)
         token = token.predicate
         assert len(stack) >= token.num_arguments
-        node = Node(token, stack[-token.num_arguments:])
+        node = Node(token, children=stack[-token.num_arguments:])
         del stack[-token.num_arguments:]
         stack.append(node)
 
@@ -130,17 +130,14 @@ def parse(code: str) -> List[Ast]:
         token = Predicates.value_of(predicate)
         assert isinstance(token, PredicateToken)
         assert len(stack) >= token.num_arguments
-        node = Node(token, stack[-token.num_arguments:])
+        node = Node(token, children=stack[-token.num_arguments:])
         del stack[-token.num_arguments:]
         stack.append(node)
 
     def parse_string(string):
         string = string[0]
         assert len(string) > 0
-        if string[0] in ("\"", "'"):
-            assert string[-1] == string[0]
-            string = string[1:-1]
-        node = StringNode(string.split(" "))
+        node = StringNode(string[1:-1].split(" "))
         stack.append(node)
 
     def parse_label(label):

@@ -4,7 +4,7 @@ from contracts.tokens.Token import Token
 
 
 class Node:
-    def __init__(self, token: Token, children: Iterable['Node'] = None, parent: 'Node' = None):
+    def __init__(self, token: Token, *, children: Iterable['Node'] = None, parent: 'Node' = None):
         self.token = token
         self.parent = parent
         self.children = [] if children is None else list(children)
@@ -33,15 +33,17 @@ class Node:
         return len(self.children) == 0
 
     def str(self, depth: int) -> List[str]:
-        result: List[str] = [" " * depth + self.token.name]
-        if not self.is_leaf():
-            for child in self.children:
-                result.extend(child.str(depth + 1))
+        result = [" " * depth + str(self)]
+        for child in self.children:
+            result.extend(child.str(depth + 1))
         return result
+
+    def __str__(self):
+        return self.token.name
 
     def clone(self) -> 'Node':
         children = (child.clone() for child in self.children)
-        return Node(self.token, children, self.parent)
+        return Node(self.token, children=children, parent=self.parent)
 
     def consistent(self) -> bool:
         for child in self.children:

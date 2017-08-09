@@ -6,12 +6,11 @@ from contracts.tokens import Markers
 
 class StringNode(Node):
     def __init__(self, words: List[str], parent: 'Node' = None):
-        super().__init__(Markers.STRING, parent)
+        super().__init__(Markers.STRING, parent=parent)
         self.words = words
 
-    def str(self, depth: int):
-        result: List[str] = [" " * depth + self.token.name + " \"{}\"".format(" ".join(self.words))]
-        return result
+    def __str__(self):
+        return "\"%s\"" % " ".join(self.words)
 
     def __eq__(self, other):
         result = not super().__eq__(other)

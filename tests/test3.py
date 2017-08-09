@@ -32,10 +32,10 @@ class TestCase(unittest.TestCase):
         raw_forest = (("strong", " not_equal", "  param[0]", "  null"),
                       ("weak", " not_equal", "  param[1]", "  null"),
                       ("strong", " not_equal", "  result", "  null"),
-                      ("strong", " equal", "  string \"begin The bucket is reset end\"", "  true"),
-                      ("strong", " equal", "  string \"begin The bucket must not be shared end\"", "  true"),
-                      ("strong", " equal", "  string \"begin parsing is not supported end\"", "  false"),
-                      ("strong", " equal", "  string \"begin the text to parse is invalid end\"", "  false"))
+                      ("strong", " equal", "  \"begin The bucket is reset end\"", "  true"),
+                      ("strong", " equal", "  \"begin The bucket must not be shared end\"", "  true"),
+                      ("strong", " equal", "  \"begin parsing is not supported end\"", "  false"),
+                      ("strong", " equal", "  \"begin the text to parse is invalid end\"", "  false"))
         forest = Parser.parse("\n".join(raw_code))
         compiler = AstDfsGuide(AstCompiler())
         parsed = [compiler.accept(tree) for tree in forest]
