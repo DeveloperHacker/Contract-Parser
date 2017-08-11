@@ -1,20 +1,17 @@
 import unittest
 
-from contracts.guides.AstDfsGuide import AstDfsGuide
-from contracts.parser import Parser
-from contracts.visitors.AstCompiler import AstCompiler
+from contracts import Parser, Decompiler
+from contracts.Compiler import DfsCompiler
+from contracts.Validator import Validator
 
 
 class TestCase(unittest.TestCase):
     def test(self):
-        raw_code = ("strong 'the field' is 'supported'",
-                    "strong 'the field' is not 'supported'")
-        raw_tree = (("strong", " is_", "  \"the field\"", "  \"supported\""),
-                    ("strong", " is_not", "  \"the field\"", "  \"supported\""))
-        forest = Parser.parse("\n".join(raw_code))
-        compiler = AstDfsGuide(AstCompiler())
-        parsed = [compiler.accept(tree) for tree in forest]
-        forest = [Parser.parse_tree(*args) for args in parsed]
-        for tree, raw_tree in zip(forest, raw_tree):
-            assert tree.consistent()
-            assert str(tree) == "\n".join(raw_tree)
+        raw_code = "strong 'the field' is 'supported' strong 'the field' is not 'supported'"
+        raw_tree = "root(strong(is('the field','supported')),strong(is not('the field','supported')))"
+        tree = Parser.parse(raw_code)
+        compiler = DfsCompiler()
+        tokens = compiler.accept(tree)
+        tree = Decompiler.dfs(tokens)
+        Validator().accept(tree)
+        assert str(tree) == raw_tree

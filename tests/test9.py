@@ -1,24 +1,23 @@
-import itertools
 import unittest
 
-from contracts.guides.AstDfsGuide import AstDfsGuide
-from contracts.parser import Parser
-from contracts.visitors.AstCompiler import AstCompiler
+from contracts import Parser, Decompiler
+from contracts.Compiler import DfsCompiler
+from contracts.Validator import Validator
 
 
 class TestCase(unittest.TestCase):
     def test(self):
-        raw_code = ("not_equal(param[0], null)",
-                    "may(param[1], null)",
-                    "follow(equal(param[1], null), 'default zone')",
-                    "not_equal(param[0], null)",
-                    "`not_equal(result, null)",
-                    "may(param[0], 'negative')",
-                    "not_equal(param[0], null)",
-                    "not_equal(param[1], null)",
-                    "not_equal(param[2], null)",
-                    "follow(equal(param[3], 'null'), param[3] == 'ISOChronology in default zone')",
-                    "may(param[3], 'null')",
+        raw_code = ("param[0] != 'null'",
+                    "param[1] may 'null'",
+                    "param[1] == 'null' => 'default zone'",
+                    "param[0] != 'null'",
+                    "`result != 'null'",
+                    "param[0] may 'negative'",
+                    "param[0] != 'null'",
+                    "param[1] != 'null'",
+                    "param[2] != 'null'",
+                    "param[3] == 'null' => param[3] == 'ISOChronology in default zone'",
+                    "param[3] may 'null'",
                     "param[0] is 'valid values defined by the chronology'",
                     "param[1] is 'valid values defined by the chronology'",
                     "param[2] is 'valid values defined by the chronology'",
@@ -26,8 +25,8 @@ class TestCase(unittest.TestCase):
                     "param[1] is 'the month of the year'",
                     "param[2] is 'the day of the month'",
                     "param[3] is 'the chronology'")
-        forest = itertools.chain(*(Parser.parse(raw_line) for raw_line in raw_code))
-        compiler = AstDfsGuide(AstCompiler())
-        parsed = [compiler.accept(tree) for tree in forest]
-        forest = [Parser.parse_tree(*args) for args in parsed]
-        assert all(tree.consistent() for tree in forest)
+        tree = Parser.parse("\n".join(raw_code))
+        compiler = DfsCompiler()
+        tokens = compiler.accept(tree)
+        Decompiler.dfs(tokens)
+        Validator().accept(tree)
