@@ -29,6 +29,7 @@ def build(parsers: dict):
     marker = Keyword(RESULT) | Keyword(TRUE) | Keyword(FALSE) | Keyword(THIS) | Keyword(_THIS)
     function = Keyword(GET)
     get = Literal(GETATTR)
+    contain = Literal(CONTAIN_PROPERTY) | Literal(NOT_CONTAIN_PROPERTY)
     operator2 = Literal(EQUAL) | Literal(NOT_EQUAL) | Keyword(MAY)
     operator2 |= And(Keyword(word) for word in IS_NOT.split(" ")) | Keyword(IS)
     operator2 |= Literal(GREATER_OR_EQUAL) | Literal(GREATER) | Literal(LOWER_OR_EQUAL) | Literal(LOWER)
@@ -44,7 +45,8 @@ def build(parsers: dict):
     marker_st = (marker | Combine(Keyword(PARAM) + slb + number + srb)).setParseAction(parsers[MARKER])
     function_st = (function + Suppress(round_invocation_st)).setParseAction(parsers[FUNCTION])
     getattr_st = marker_st + ZeroOrMore((get + Suppress(name_st)).setParseAction(parsers[OPERATOR]))
-    atom_st = (lb + expression + rb) | function_st | string_st | getattr_st
+    contain_st = getattr_st + ZeroOrMore((contain + Suppress(string_st)).setParseAction(parsers[OPERATOR]))
+    atom_st = (lb + expression + rb) | function_st | string_st | contain_st
     operator_st = atom_st + ZeroOrMore((operator2 + Suppress(atom_st)).setParseAction(parsers[OPERATOR]))
     operator_st = operator_st + ZeroOrMore((operator3 + Suppress(operator_st)).setParseAction(parsers[OPERATOR]))
     operator_st = operator_st + ZeroOrMore((operator4 + Suppress(operator_st)).setParseAction(parsers[OPERATOR]))
