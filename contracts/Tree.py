@@ -29,8 +29,11 @@ class Tree:
     def height(self) -> int:
         return self.root.height()
 
+    def clone(self) -> 'Tree':
+        return Tree(self.root.clone())
+
 
 def string(depth: int, node: Node) -> str:
-    result = [" " * depth + node.token.name]
+    result = ["│" * depth + node.token.name]
     result.extend(string(depth + 1, node) for node in node.children)
     return "\n".join(result)

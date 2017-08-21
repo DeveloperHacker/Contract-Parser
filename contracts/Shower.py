@@ -8,7 +8,7 @@ from contracts.TreeVisitor import TreeVisitor
 
 
 def priority(token: Token) -> int:
-    if token.name in (EQUAL, NOT_EQUAL, MAY, IS, IS_NOT, GREATER_OR_EQUAL, GREATER, LOWER_OR_EQUAL, LOWER):
+    if token.name in (EQUAL, NOT_EQUAL, IS, IS_NOT, GREATER_OR_EQUAL, GREATER, LOWER_OR_EQUAL, LOWER):
         return 1
     if token.name == AND:
         return 2

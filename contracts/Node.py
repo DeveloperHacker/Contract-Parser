@@ -36,3 +36,9 @@ class Node:
         if self.leaf():
             return 1
         return max(child.height() for child in self.children) + 1
+
+    def clone(self) -> 'Node':
+        children = (child.clone() for child in self.children)
+        token = self.token.clone()
+        node = Node(token, *children)
+        return node

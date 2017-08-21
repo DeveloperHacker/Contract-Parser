@@ -21,3 +21,6 @@ class Token:
         if result is NotImplemented:
             return result
         return not result
+
+    def clone(self) -> 'Token':
+        return Token(self.name, self.type)

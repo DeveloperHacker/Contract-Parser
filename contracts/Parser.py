@@ -1,6 +1,8 @@
 from typing import List
 
-from pyparsing import *
+import pyparsing
+from pyparsing import Literal, Regex, quotedString, Word, alphanums, Keyword, Combine, And, Forward, ZeroOrMore, \
+    Suppress, OneOrMore, Optional, StringEnd
 
 from contracts.Node import Node
 from contracts.Token import Token
@@ -16,6 +18,30 @@ SHORT_WEAK = "`"
 GET = "get"
 
 
+class ParseException(Exception):
+    @staticmethod
+    def value_of(code, ex: pyparsing.ParseException) -> 'ParseException':
+        return ParseException(code, ex.loc, ex.lineo, ex.col)
+
+    def __init__(self, code: str, number: int, row: int, column: int):
+        super().__init__(self.format(number, code))
+        self.number = number
+        self.row = row
+        self.column = column
+        self.text = code
+
+    @staticmethod
+    def format(number, text) -> str:
+        result = []
+        for i, line in enumerate(text.split('\n')):
+            result.append(line)
+            length = len(line) + 1
+            if 0 <= number < length:
+                result.append("~" * number + "^")
+            number -= length
+        return "\n".join(result)
+
+
 def build(parsers: dict):
     comma = Literal(",")
     rb = Literal(")")
@@ -26,11 +52,12 @@ def build(parsers: dict):
     string = quotedString()
     name = Word(alphanums)
     label = Keyword(STRONG) | Keyword(WEAK) | Literal(SHORT_WEAK)
-    marker = Keyword(RESULT) | Keyword(TRUE) | Keyword(FALSE) | Keyword(THIS) | Keyword(_THIS)
+    param = Combine(Keyword(PARAM) + slb + number + srb)
+    marker = Keyword(RESULT) | Keyword(TRUE) | Keyword(FALSE) | Keyword(THIS) | Keyword(_THIS) | param
     function = Keyword(GET)
     get = Literal(GETATTR)
     contain = Literal(CONTAIN_PROPERTY) | Literal(NOT_CONTAIN_PROPERTY)
-    operator2 = Literal(EQUAL) | Literal(NOT_EQUAL) | Keyword(MAY)
+    operator2 = Literal(EQUAL) | Literal(NOT_EQUAL)
     operator2 |= And(Keyword(word) for word in IS_NOT.split(" ")) | Keyword(IS)
     operator2 |= Literal(GREATER_OR_EQUAL) | Literal(GREATER) | Literal(LOWER_OR_EQUAL) | Literal(LOWER)
     operator3 = Keyword(AND)
@@ -40,25 +67,32 @@ def build(parsers: dict):
     expression = Forward()
     string_st = string.setParseAction(parsers[STRING])
     name_st = name.setParseAction(parsers[STRING])
-    tuple_st = (expression + ZeroOrMore(comma + expression)) | Optional(expression)
-    round_invocation_st = (lb + tuple_st + rb).setParseAction(parsers[INVOCATION])
-    marker_st = (marker | Combine(Keyword(PARAM) + slb + number + srb)).setParseAction(parsers[MARKER])
+    marker_st = marker.setParseAction(parsers[MARKER])
+    tuple_st = expression + ZeroOrMore(comma + expression)
+    round_invocation_st = (lb + Optional(tuple_st) + rb).setParseAction(parsers[INVOCATION])
     function_st = (function + Suppress(round_invocation_st)).setParseAction(parsers[FUNCTION])
-    getattr_st = marker_st + ZeroOrMore((get + Suppress(name_st)).setParseAction(parsers[OPERATOR]))
-    contain_st = getattr_st + ZeroOrMore((contain + Suppress(string_st)).setParseAction(parsers[OPERATOR]))
+    getattr_st = (marker_st | name_st) + OneOrMore((get + Suppress(name_st)).setParseAction(parsers[OPERATOR]))
+    contain_st = (getattr_st | marker) + ZeroOrMore((contain + Suppress(string_st)).setParseAction(parsers[OPERATOR]))
     atom_st = (lb + expression + rb) | function_st | string_st | contain_st
-    operator_st = atom_st + ZeroOrMore((operator2 + Suppress(atom_st)).setParseAction(parsers[OPERATOR]))
-    operator_st = operator_st + ZeroOrMore((operator3 + Suppress(operator_st)).setParseAction(parsers[OPERATOR]))
-    operator_st = operator_st + ZeroOrMore((operator4 + Suppress(operator_st)).setParseAction(parsers[OPERATOR]))
-    operator_st = operator_st + ZeroOrMore((operator5 + Suppress(operator_st)).setParseAction(parsers[OPERATOR]))
-    expression << operator_st
+    operator1_st = atom_st + ZeroOrMore((operator2 + Suppress(atom_st)).setParseAction(parsers[OPERATOR]))
+    operator2_st = operator1_st + ZeroOrMore((operator3 + Suppress(operator1_st)).setParseAction(parsers[OPERATOR]))
+    operator3_st = operator2_st + ZeroOrMore((operator4 + Suppress(operator2_st)).setParseAction(parsers[OPERATOR]))
+    operator4_st = operator3_st + ZeroOrMore((operator5 + Suppress(operator3_st)).setParseAction(parsers[OPERATOR]))
+    expression << operator4_st
+
+    getattr_st.enablePackrat()
 
     statement = (Optional(label, STRONG) + Suppress(expression)).setParseAction(parsers[LABEL])
     return ZeroOrMore(statement) + StringEnd()
 
 
 def parse(code: str) -> Tree:
+    def log(strings: list):
+        # print("\t{:<15} -> {:s}".format(" ".join(strings), ":".join(str(node) for node in stack)))
+        pass
+
     def parse_label(strings: list):
+        log(strings)
         assert len(strings) == 1
         assert len(stack) == 1
         name = strings[0]
@@ -69,6 +103,7 @@ def parse(code: str) -> Tree:
         tree.root.children.append(node)
 
     def parse_function(strings: list):
+        log(strings)
         assert len(strings) == 1
         assert len(stack) > 0
         assert stack[-1].token.name == INVOCATION
@@ -80,6 +115,8 @@ def parse(code: str) -> Tree:
         stack.append(node)
 
     def parse_operator(strings: list):
+        log(strings)
+        assert len(strings) >= 1
         assert len(stack) > 1
         name = " ".join(strings)
         token = Token(name, OPERATOR)
@@ -89,6 +126,7 @@ def parse(code: str) -> Tree:
         stack.append(node)
 
     def parse_marker(strings: list):
+        log(strings)
         assert len(strings) == 1
         name = strings[0]
         token = Token(name, MARKER)
@@ -96,6 +134,7 @@ def parse(code: str) -> Tree:
         stack.append(node)
 
     def parse_string(strings: list):
+        log(strings)
         assert len(strings) == 1
         name = strings[0]
         if name[0] not in ('"', "'"):
@@ -105,6 +144,7 @@ def parse(code: str) -> Tree:
         stack.append(node)
 
     def parse_invocation(strings: list):
+        log(strings)
         assert len(strings) > 1
         num_arguments = min(len(strings) - 2, list(strings).count(",") + 1)
         assert len(stack) >= num_arguments
@@ -114,18 +154,23 @@ def parse(code: str) -> Tree:
         del stack[-num_arguments:]
         stack.append(node)
 
-    stack: List[Node] = []
-    root_token = Token(ROOT, ROOT)
-    root_node = Node(root_token)
-    tree = Tree(root_node)
-    parsers = {LABEL: parse_label,
-               FUNCTION: parse_function,
-               OPERATOR: parse_operator,
-               MARKER: parse_marker,
-               STRING: parse_string,
-               INVOCATION: parse_invocation}
-    parser = build(parsers)
-    parser.parseString(code)
-    assert len(stack) == 0
-    Validator().accept(tree)
-    return tree
+    try:
+        stack: List[Node] = []
+        root_token = Token(ROOT, ROOT)
+        root_node = Node(root_token)
+        tree = Tree(root_node)
+        parsers = {LABEL: parse_label,
+                   FUNCTION: parse_function,
+                   OPERATOR: parse_operator,
+                   MARKER: parse_marker,
+                   STRING: parse_string,
+                   INVOCATION: parse_invocation}
+        parser = build(parsers)
+        parser.parseString(code)
+        assert len(stack) == 0
+        Validator().accept(tree)
+        return tree
+    except AssertionError:
+        raise ParseException(code, 0, 0, 0)
+    except pyparsing.ParseException as ex:
+        raise ParseException.value_of(code, ex)
