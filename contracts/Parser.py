@@ -21,7 +21,7 @@ GET = "get"
 class ParseException(Exception):
     @staticmethod
     def value_of(code, ex: pyparsing.ParseException) -> 'ParseException':
-        return ParseException(code, ex.loc, ex.lineo, ex.col)
+        return ParseException(code, ex.loc, ex.lineno, ex.col)
 
     def __init__(self, code: str, number: int, row: int, column: int):
         super().__init__(self.format(number, code))
@@ -32,7 +32,7 @@ class ParseException(Exception):
 
     @staticmethod
     def format(number, text) -> str:
-        result = []
+        result = [""]
         for i, line in enumerate(text.split('\n')):
             result.append(line)
             length = len(line) + 1
@@ -56,13 +56,14 @@ def build(parsers: dict):
     marker = Keyword(RESULT) | Keyword(TRUE) | Keyword(FALSE) | Keyword(THIS) | Keyword(_THIS) | param
     function = Keyword(GET)
     get = Literal(GETATTR)
-    contain = Literal(CONTAIN_PROPERTY) | Literal(NOT_CONTAIN_PROPERTY)
-    operator2 = Literal(EQUAL) | Literal(NOT_EQUAL)
-    operator2 |= And(Keyword(word) for word in IS_NOT.split(" ")) | Keyword(IS)
-    operator2 |= Literal(GREATER_OR_EQUAL) | Literal(GREATER) | Literal(LOWER_OR_EQUAL) | Literal(LOWER)
-    operator3 = Keyword(AND)
-    operator4 = Keyword(OR)
-    operator5 = Keyword(FOLLOW)
+    operator1 = Literal(MUL) | Literal(DIV) | Literal(MOD)
+    operator2 = Literal(ADD) | Literal(SUB)
+    operator3 = Literal(EQUAL) | Literal(NOT_EQUAL)
+    operator3 |= And(Keyword(word) for word in IS_NOT.split(" ")) | Keyword(IS)
+    operator4 = Literal(GREATER_OR_EQUAL) | Literal(GREATER) | Literal(LOWER_OR_EQUAL) | Literal(LOWER)
+    operator5 = Keyword(AND)
+    operator6 = Keyword(OR)
+    operator7 = Keyword(FOLLOW)
 
     expression = Forward()
     string_st = string.setParseAction(parsers[STRING])
@@ -72,13 +73,15 @@ def build(parsers: dict):
     round_invocation_st = (lb + Optional(tuple_st) + rb).setParseAction(parsers[INVOCATION])
     function_st = (function + Suppress(round_invocation_st)).setParseAction(parsers[FUNCTION])
     getattr_st = (marker_st | name_st) + OneOrMore((get + Suppress(name_st)).setParseAction(parsers[OPERATOR]))
-    contain_st = (getattr_st | marker) + ZeroOrMore((contain + Suppress(string_st)).setParseAction(parsers[OPERATOR]))
-    atom_st = (lb + expression + rb) | function_st | string_st | contain_st
-    operator1_st = atom_st + ZeroOrMore((operator2 + Suppress(atom_st)).setParseAction(parsers[OPERATOR]))
-    operator2_st = operator1_st + ZeroOrMore((operator3 + Suppress(operator1_st)).setParseAction(parsers[OPERATOR]))
-    operator3_st = operator2_st + ZeroOrMore((operator4 + Suppress(operator2_st)).setParseAction(parsers[OPERATOR]))
-    operator4_st = operator3_st + ZeroOrMore((operator5 + Suppress(operator3_st)).setParseAction(parsers[OPERATOR]))
-    expression << operator4_st
+    atom_st = (lb + expression + rb) | function_st | string_st | getattr_st | marker_st
+    operator_st = atom_st + ZeroOrMore((operator1 + Suppress(atom_st)).setParseAction(parsers[OPERATOR]))
+    operator_st = operator_st + ZeroOrMore((operator2 + Suppress(operator_st)).setParseAction(parsers[OPERATOR]))
+    operator_st = operator_st + ZeroOrMore((operator3 + Suppress(operator_st)).setParseAction(parsers[OPERATOR]))
+    operator_st = operator_st + ZeroOrMore((operator4 + Suppress(operator_st)).setParseAction(parsers[OPERATOR]))
+    operator_st = operator_st + ZeroOrMore((operator5 + Suppress(operator_st)).setParseAction(parsers[OPERATOR]))
+    operator_st = operator_st + ZeroOrMore((operator6 + Suppress(operator_st)).setParseAction(parsers[OPERATOR]))
+    operator_st = operator_st + ZeroOrMore((operator7 + Suppress(operator_st)).setParseAction(parsers[OPERATOR]))
+    expression << operator_st
 
     getattr_st.enablePackrat()
 

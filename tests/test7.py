@@ -20,5 +20,4 @@ class TestCase(unittest.TestCase):
         Parser.parse("'1' <= param[1] and param[1] <= '12'")
         Parser.parse("'1' <= param[1] and param[1] <= '12' or '1' <= param[2] and param[2] <= '31'")
         Parser.parse("strong get(get(this, 'field'), 'field')")
-        Parser.parse("this.years <x 'contains' this.months <x 'contains'")
         Parser.parse("")
